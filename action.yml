@@ -48,3 +48,38 @@ runs:
           exit 11
         fi
 
+    - name: Check and set GITHUB_HEAD_REF env variable
+      shell: bash
+      run: |
+        if [[ -z $GITHUB_HEAD_REF ]]; then
+          echo "GITHUB_HEAD_REF isn't set"
+          echo GITHUB_HEAD_REF="refs/thingy/master" >> $GITHUB_ENV
+        else
+          echo "GITHUB_HEAD_REF is set: ${GITHUB_HEAD_REF}"
+        fi
+
+    - name: Generate Phylum label
+      shell: bash
+      run: |
+        echo PHYLUM_LABEL="GHA-PR${PR_NUM}-${GITHUB_HEAD_REF}" >> $GITHUB_ENV
+        echo "PHYLUM_LABEL = ${PHYLUM_LABEL}"
+
+    - name: Analyze project lockfile
+      shell: bash
+      run: |
+        export PATH="$HOME/.phylum:$PATH"
+        pushd $GITHUB_WORKSPACE || exit 11
+          phylum analyze -l $PHYLUM_LABEL requirements.txt --verbose --json > ~/phylum_analysis.json
+          echo "[*] Analyzed requirements.txt under label ${PHYLUM_LABEL} and wrote results to ~/phylum_analysis.json"
+        popd
+
+    - uses: technote-space/get-diff-action@v4
+      with:
+        FILES: |
+          requirements.txt
+          #pyproject.toml
+
+    - name: Get requirements.txt git diff
+      shell: bash
+      run: git diff --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} > ~/DIFF
+      if: env.GIT_DIFF

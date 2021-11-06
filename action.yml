@@ -98,12 +98,12 @@ runs:
         pip install requests
         pip install unidiff
 
-    # - name: Setup tmate session
-      # uses: mxschmitt/action-tmate@v3
-    - name: print env
-      shell: bash
-      run: |
-        env
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+    # - name: print env
+      # shell: bash
+      # run: |
+        # env
 
     - name: python script analyze_updated_requirements_txt
       shell: bash

@@ -38,12 +38,12 @@ runs:
         phylum_username: ${{ inputs.phylum_username_in }}
         phylum_password: ${{ inputs.phylum_password_in }}
     - name: Check for existing project
-        run: |
-          result=$(find . -maxdepth 1 -iname ".phylum_project")
-          if [[ -n $result ]]; then
-            echo "Phylum project found: $result"
-          else
-            echo "[ERROR] Phylum project file not found"
-            exit 11
-          fi
+      run: |
+        result=$(find . -maxdepth 1 -iname ".phylum_project")
+        if [[ -n $result ]]; then
+          echo "Phylum project found: $result"
+        else
+          echo "[ERROR] Phylum project file not found"
+          exit 11
+        fi
 

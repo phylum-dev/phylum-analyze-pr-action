@@ -112,24 +112,24 @@ class AnalyzePRForReqs():
         pkg_eng = riskvectors.get('engineering')
         pkg_lic = riskvectors.get('license')
         pkg_aut = riskvectors.get('author')
-        if pkg_vul < self.vul:
+        if pkg_vul <= self.vul:
             failed_flag = 1
             vuln_flag = 1
             issue_flags.append('vul')
             fail_string += f"|Software Vulnerability|{pkg_vul*100}|{self.vul*100}|\n"
-        if pkg_mal < self.mal:
+        if pkg_mal <= self.mal:
             failed_flag = 1
             issue_flags.append('mal')
             fail_string += f"|Malicious Code|{pkg_mal*100}|{self.mul*100}|\n"
-        if pkg_eng < self.eng:
+        if pkg_eng <= self.eng:
             failed_flag = 1
             issue_flags.append('eng')
             fail_string += f"|Engineering|{pkg_eng*100}|{self.eng*100}|\n"
-        if pkg_lic < self.lic:
+        if pkg_lic <= self.lic:
             failed_flag = 1
             issue_flags.append('lic')
             fail_string += f"|License|{pkg_lic*100}|{self.lic*100}|\n"
-        if pkg_aut < self.aut:
+        if pkg_aut <= self.aut:
             failed_flag = 1
             issue_flags.append('aut')
             fail_string += f"|Author|{pkg_aut*100}|{self.aut*100}|\n"
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     argv = sys.argv
 
     if argc := len(sys.argv) < 8:
-        print(f"Usage: {argv[0]} DIFF_URL VUL_THRESHOLD MAL_THRESHOLD ENG_THRESHOLD LIC_THRESHOLD AUT_THRESHOLD")
+        print(f"Usage: {argv[0]} GITHUB_REPOSITORY PR_NUM VUL_THRESHOLD MAL_THRESHOLD ENG_THRESHOLD LIC_THRESHOLD AUT_THRESHOLD")
         sys.exit(11)
 
     #  diff_url = argv[1]

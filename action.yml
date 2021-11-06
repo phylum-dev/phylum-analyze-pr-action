@@ -100,7 +100,8 @@ runs:
 
     - name: python script analyze_updated_requirements_txt
       shell: bash
-      run: python $GITHUB_ACTION_PATH/analyze_updated_requirements_txt.py $GITHUB_REPOSITORY $PR_NUM $VUL $MAL $ENG $LIC $AUT
+      # run: python $GITHUB_ACTION_PATH/analyze_updated_requirements_txt.py $GITHUB_REPOSITORY $PR_NUM $VUL $MAL $ENG $LIC $AUT
+      run: python $GITHUB_ACTION_PATH/analyze_updated_requirements_txt.py $GITHUB_REPOSITORY ${{ github.event.number }} ${{ inputs.vul_threshold }} ${{ inputs.mal_threshold }} ${{ inputs.eng_threshold }} ${{ inputs.lic_threshold }} ${{ inputs.aut_threshold }}
 
     - id: get-returncode
       shell: bash

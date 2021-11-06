@@ -62,11 +62,22 @@ runs:
           echo "GITHUB_HEAD_REF is set: ${GITHUB_HEAD_REF}"
         fi
 
+    - name: Get PR number
+      shell: bash
+      run: |
+        echo PR_NUM="${{ github.event.number }}" >> $GITHUB_ENV
+
     - name: Generate Phylum label
       shell: bash
       run: |
         echo PHYLUM_LABEL="GHA-PR${PR_NUM}-${GITHUB_HEAD_REF}" >> $GITHUB_ENV
-        echo "PHYLUM_LABEL = $PHYLUM_LABEL"
+
+    - name: check env vars
+      shell: bash
+      run: |
+        echo "GITHUB_HEAD_REF = ${GITHUB_HEAD_REF}"
+        echo "PR_NUM = ${PR_NUM}"
+        echo "PHYLUM_LABEL = ${PHYLUM_LABEL}"
 
     - name: Analyze project lockfile
       shell: bash

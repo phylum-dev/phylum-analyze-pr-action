@@ -131,6 +131,13 @@ runs:
         echo 'exiting with 5 for incomplete packages'
         exit 5
 
+    - name: return 0 for success
+      shell: bash
+      if: "contains(steps.get-returncode.outputs.ret, '0')"
+      run: |
+        echo 'exiting with 0 for success'
+        exit 0
+
     - id: get-comment-body
       shell: bash
       run: |

@@ -1,3 +1,6 @@
+#TODO: NEXT
+# - $GITHUB_REPOSITORY doesn't flow through to the action, it lives in the workflow.
+#   NEED TO FIND THAT, probably by examining the environment
 #                  _
 #  __ _ _ __   __ _| |_   _ _______
 # / _` | '_ \ / _` | | | | |_  / _ \
@@ -95,8 +98,8 @@ runs:
         pip install requests
         pip install unidiff
 
-    # - name: Setup tmate session
-      # uses: mxschmitt/action-tmate@v3
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
 
     - name: python script analyze_updated_requirements_txt
       shell: bash

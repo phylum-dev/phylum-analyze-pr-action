@@ -53,7 +53,8 @@ runs:
       run: |
         if [[ -z $GITHUB_HEAD_REF ]]; then
           echo "GITHUB_HEAD_REF isn't set"
-          echo GITHUB_HEAD_REF="refs/thingy/master" >> $GITHUB_ENV
+          echo GITHUB_HEAD_REF="example" >> $GITHUB_ENV
+          echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
         else
           echo "GITHUB_HEAD_REF is set: ${GITHUB_HEAD_REF}"
         fi

@@ -35,8 +35,8 @@ runs:
     - id: phylum-test
       uses: peterjmorgan/install-phylum-latest-action@master
       with:
-        phylum_username: ${{ inputs.phylum_username_in }}
-        phylum_password: ${{ inputs.phylum_password_in }}
+        phylum_username: ${{ inputs.phylum_username }}
+        phylum_password: ${{ inputs.phylum_password }}
     - name: Check for existing project
       shell: bash
       run: |

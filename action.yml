@@ -38,6 +38,7 @@ runs:
         phylum_username: ${{ inputs.phylum_username_in }}
         phylum_password: ${{ inputs.phylum_password_in }}
     - name: Check for existing project
+      shell: bash
       run: |
         result=$(find . -maxdepth 1 -iname ".phylum_project")
         if [[ -n $result ]]; then

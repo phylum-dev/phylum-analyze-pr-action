@@ -84,3 +84,57 @@ runs:
       shell: bash
       run: git diff --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} > ~/DIFF
       if: env.GIT_DIFF
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: install python dependencies
+      shell: bash
+      run: |
+        pip install requests
+        pip install unidiff
+
+    - name: python script analyze_updated_requirements_txt
+      shell: bash
+      run: python analyze_updated_requirements_txt.py $GITHUB_REPOSITORY $PR_NUM $VUL $MAL $ENG $LIC $AUT
+
+    - id: get-returncode
+      shell: bash
+      run: |
+        ret="$(cat ~/returncode.txt)"
+        ret="${ret//'%'/'%25'}"
+        ret="${ret//$'\n'/'%0A'}"
+        ret="${ret//$'\r'/'%0A'}"
+        echo "::set-output name=ret::$ret"
+
+    - name: return 5 for incomplete packages
+      shell: bash
+      if: "contains(steps.get-returncode.outputs.ret, '5')"
+      run: |
+        echo 'exiting with 5 for incomplete packages'
+        exit 5
+
+    - id: get-comment-body
+      shell: bash
+      run: |
+        body="$(cat ~/pr_comment.txt)"
+        body="${body//'%'/'%25'}"
+        body="${body//$'\n'/'%0A'}"
+        body="${body//$'\r'/'%0A'}"
+        echo "::set-output name=body::$body"
+
+    - name: Set comment
+      uses: peter-evans/create-or-update-comment@v1
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body: ${{ steps.get-comment-body.outputs.body }}
+        comment-author: 'Phylum[bot]'
+
+    - name: return 1 for risk analysis failure
+      shell: bash
+      if: "contains(steps.get-returncode.outputs.ret, '1')"
+      run: |
+        echo 'exiting with 1 for risk analysis failure'
+        exit 1
+

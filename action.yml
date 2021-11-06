@@ -22,10 +22,10 @@ inputs:
   aut_threshold:
     description: "Author risk score threshold value"
     required: true
-  phylum_username:
+  phylum_username_in:
     description: "Phylum username"
     required: true
-  phylum_password:
+  phylum_password_in:
     description: "Phylum password"
     required: true
 
@@ -35,8 +35,8 @@ runs:
     - id: phylum-test
       uses: peterjmorgan/install-phylum-latest-action@master
       with:
-        phylum_username: ${{ inputs.phylum_username }}
-        phylum_password: ${{ inputs.phylum_password }}
+        phylum_username: ${{ inputs.phylum_username_in }}
+        phylum_password: ${{ inputs.phylum_password_in }}
     - name: Check for existing project
         run: |
           result=$(find . -maxdepth 1 -iname ".phylum_project")

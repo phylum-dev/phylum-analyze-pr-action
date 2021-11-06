@@ -32,6 +32,7 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - uses: actions/checkout@v2
     - id: phylum-test
       uses: peterjmorgan/install-phylum-latest-action@master
       with:

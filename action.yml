@@ -68,6 +68,7 @@ runs:
     - name: Get PR number
       shell: bash
       run: |
+        echo ${{ inputs.pr_num }}
         echo PR_NUM="${{ inputs.pr_num }}" >> $GITHUB_ENV
 
     - name: Generate Phylum label
@@ -81,6 +82,7 @@ runs:
         echo "GITHUB_HEAD_REF = ${GITHUB_HEAD_REF}"
         echo "PR_NUM = ${PR_NUM}"
         echo "PHYLUM_LABEL = ${PHYLUM_LABEL}"
+        echo "EVENT NUMBER = ${{ github.event.number }}"
 
     - name: Analyze project lockfile
       shell: bash

@@ -1,14 +1,11 @@
-#TODO: NEXT
-# - $GITHUB_REPOSITORY doesn't flow through to the action, it lives in the workflow.
-#   NEED TO FIND THAT, probably by examining the environment
-#                  _
+#                   _
 #  __ _ _ __   __ _| |_   _ _______
 # / _` | '_ \ / _` | | | | |_  / _ \
 #| (_| | | | | (_| | | |_| |/ /  __/
-#\__,_|_| |_|\__,_|_|\__, /___\___|
+# \__,_|_| |_|\__,_|_|\__, /___\___|
 #                    |___/
-name: 'Analyze PR Python'
-description: 'Analyze Pull request Python'
+name: 'Analyze PR'
+description: 'Analyze Pull request'
 inputs:
   vul_threshold:
     description: "Vulnerability risk score threshold value"
@@ -104,8 +101,8 @@ runs:
         pip install requests
         pip install unidiff
 
-    # - name: Setup tmate session
-      # uses: mxschmitt/action-tmate@v3
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
 
     - name: python script analyze_updated_requirements_txt
       shell: bash
@@ -152,7 +149,7 @@ runs:
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: ${{ steps.get-comment-body.outputs.body }}
-        comment-author: 'Phylum[bot]'
+        # comment-author: 'Phylum[bot]'
 
     - name: return 1 for risk analysis failure
       shell: bash

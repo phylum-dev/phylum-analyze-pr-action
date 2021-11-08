@@ -122,8 +122,8 @@ runs:
       shell: bash
       run: python $GITHUB_ACTION_PATH/analyze.py "analyze" $GITHUB_REPOSITORY ${{ github.event.number }} ${{ inputs.vul_threshold }} ${{ inputs.mal_threshold }} ${{ inputs.eng_threshold }} ${{ inputs.lic_threshold }} ${{ inputs.aut_threshold }}
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
+    # - name: Setup tmate session
+      # uses: mxschmitt/action-tmate@v3
 
     - id: get-returncode
       shell: bash

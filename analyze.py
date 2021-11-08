@@ -321,7 +321,7 @@ class AnalyzePRForReqs():
 if __name__ == "__main__":
     argv = sys.argv
 
-    if argc := len(sys.argv) < 9:
+    if argc := len(sys.argv) < 4:
         print(f"Usage: {argv[0]} ACTION:(analyze|pr_type) GITHUB_REPOSITORY PR_NUM VUL_THRESHOLD MAL_THRESHOLD ENG_THRESHOLD LIC_THRESHOLD AUT_THRESHOLD")
         sys.exit(11)
 

@@ -281,7 +281,7 @@ class AnalyzePRForReqs():
         pr_type = self.determine_pr_type(diff_data)
         changes = self.get_diff_hunks(diff_data, pr_type)
         pkg_ver = self.generate_pkgver(changes, pr_type)
-        phylum_json = self.read_phylum_analysis('phylum_analysis.json')
+        phylum_json = self.read_phylum_analysis('/home/runner/phylum_analysis.json')
         risk_data = self.parse_risk_data(phylum_json, pkg_ver)
         project_url = self.get_project_url(phylum_json)
         returncode = 0
@@ -293,21 +293,19 @@ class AnalyzePRForReqs():
             header = "## Phylum OSS Supply Chain Risk Analysis\n\n"
             header += "<details>\n<summary>Background</summary>\n<br />\nThis repository uses a GitHub Action to automatically analyze the risk of new dependencies added to requirements.txt via Pull Request. An administrator of this repository has set score requirements for Phylum's five risk domains.<br /><br />\nIf you see this comment, one or more dependencies added to the requirements.txt file in this Pull Request have failed Phylum's risk analysis.\n</details>\n\n"
 
-            # with open('/home/runner/pr_comment.txt','w') as outfile:
-            with open('pr_comment.txt','w') as outfile:
+            with open('/home/runner/pr_comment.txt','w') as outfile:
                 outfile.write(header)
                 for line in risk_data:
                     if line:
                         outfile.write(line)
                 outfile.write(f"\n[View this project in Phylum UI]({project_url})")
                 print(f"[DEBUG] pr_comment.txt: wrote {outfile.tell()} bytes")
-
+        # If any packages are incomplete, add 5 to the returncode so we know the results are incomplete
         if self.gbl_incomplete == True:
             print(f"[DEBUG] {len(self.incomplete_pkgs)} packages were incomplete as of the analysis job")
             returncode += 5
 
-        # with open('/home/runner/returncode.txt','w') as resultout:
-        with open('returncode.txt','w') as resultout:
+        with open('/home/runner/returncode.txt','w') as resultout:
             resultout.write(str(returncode))
             print(f"[DEBUG] returncode: wrote {str(returncode)}")
 

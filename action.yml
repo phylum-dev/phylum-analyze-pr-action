@@ -104,7 +104,7 @@ runs:
     # - name: Setup tmate session
       # uses: mxschmitt/action-tmate@v3
 
-    - name: python script analyze_updated_requirements_txt
+    - name: python script analyze.py
       shell: bash
       # run: python $GITHUB_ACTION_PATH/analyze_updated_requirements_txt.py $GITHUB_REPOSITORY $PR_NUM $VUL $MAL $ENG $LIC $AUT
       run: python $GITHUB_ACTION_PATH/analyze.py $GITHUB_REPOSITORY ${{ github.event.number }} ${{ inputs.vul_threshold }} ${{ inputs.mal_threshold }} ${{ inputs.eng_threshold }} ${{ inputs.lic_threshold }} ${{ inputs.aut_threshold }}
@@ -136,6 +136,7 @@ runs:
         exit 0
 
     - id: get-comment-body
+      if: "contains(steps.get-returncode.outputs.ret, '1')"
       shell: bash
       run: |
         body="$(cat ~/pr_comment.txt)"
@@ -145,6 +146,7 @@ runs:
         echo "::set-output name=body::$body"
 
     - name: Set comment
+      if: "contains(steps.get-returncode.outputs.ret, '1')"
       uses: peter-evans/create-or-update-comment@v1
       with:
         issue-number: ${{ github.event.pull_request.number }}

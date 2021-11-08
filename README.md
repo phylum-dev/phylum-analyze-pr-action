@@ -5,7 +5,7 @@ Enables users to configure thresholds for each of Phylum's five risk domain scor
 
 ## Features
 - configurable risk domain thresholds
-- uses 
+- uses [peter-evans/create-or-update-comment](https://github.com/marketplace/actions/create-or-update-comment) to add comments to PRs
 
 ## Getting Started
 ```yaml
@@ -43,6 +43,9 @@ jobs:
 - repository secrets: PHYLUM_USER and PHYLUM_PASS
 - concrete package versions (only applicable for requirements.txt)
 - existing Phylum project for repository (`.phylum_project` must be present)
+
+### Known Issues:
+1. Incomplete packages: if Phylum hasn't yet analyzed a package requested by this action, the action will fail with an exit code of 5. This is momentarily preferable than waiting.
 
 ### Example comment
 ![image](https://user-images.githubusercontent.com/132468/140830714-24acc278-0102-4613-b006-6032a62b6896.png)

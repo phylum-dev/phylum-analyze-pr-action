@@ -279,7 +279,7 @@ class AnalyzePRForReqs():
     def run_prtype(self):
         diff_data = self.get_PR_diff()
         pr_type = self.determine_pr_type(diff_data)
-        with open('home/runner/prtype.txt','w') as outfile:
+        with open('/home/runner/prtype.txt','w') as outfile:
             outfile.write(pr_type)
         sys.exit(0)
 

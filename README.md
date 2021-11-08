@@ -1,12 +1,16 @@
 # phylum-analyze-pr-action
 A GitHub Action to automatically analyze Pull Requests for changes to package manager lockfiles using Phylum.
 
-## Supported lockfiles:
+Enables users to configure thresholds for each of Phylum's five risk domain scores. If a package risk domain score is below the threshold, the action will fail the check on the pull request. 
+
+### Supported lockfiles:
 - requirements.txt (Python PyPI)
 - package-lock.json (JavaScript/TypeScript NPM)
 - yarn.lock (JavaScript/TypeScript NPM)
 
-## Description:
+### Requirements:
+- active Phylum account ([Register here](https://app.phylum.io/auth/registration))
+- repository secrets: PHYLUM_USER and PHYLUM_PASS
 
 ## Getting Started
 ```yaml

@@ -124,9 +124,9 @@ class AnalyzePRForReqs():
 
         while cur < len(changes)-3:
             name_match = re.match(name_pat, changes[cur])
-            if interity_match := re.match(integrity_pat, changes[cur+1]):
+            if version_match := re.match(version_pat, changes[cur+1]):
                 if resolved_match := re.match(resolved_pat, changes[cur+2]):
-                    if version_match := re.match(version_pat, changes[cur+3]):
+                    if integrity_match := re.match(integrity_pat, changes[cur+3]):
                         name = name_match.groups()[0]
                         ver = version_match.groups()[0]
                         pkg_ver.append((name,ver))

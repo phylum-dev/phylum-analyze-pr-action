@@ -116,10 +116,10 @@ class AnalyzePRForReqs():
     ''' Parse yarn.lock diff to generate a list of tuples of (package_name, version) '''
     def parse_yarn_lock(self, changes):
         cur = 0
-        name_pat        = re.compile(r"\"(.*?)@.*\":")
-        integrity_pat   = re.compile(r".*\"integrity\" \"(.*?)\"")
-        resolved_pat    = re.compile(r".*\"resolved\" \"(.*?)\"")
-        version_pat     = re.compile(r".*\"version\" \"(.*?)\"")
+        name_pat        = re.compile(r"(.*?)@.*:")
+        integrity_pat   = re.compile(r".*integrity \"(.*?)\"")
+        resolved_pat    = re.compile(r".*resolved \"(.*?)\"")
+        version_pat     = re.compile(r".*version \"(.*?)\"")
         pkg_ver = list()
 
         while cur < len(changes)-3:

@@ -276,7 +276,14 @@ class AnalyzePRForReqs():
         url = f"https://app.phylum.io/projects/{project_id}"
         return url
 
-    def run(self):
+    def run_prtype(self):
+        diff_data = self.get_PR_diff()
+        pr_type = self.determine_pr_type(diff_data)
+        with open('home/runner/prtype.txt','w') as outfile:
+            outfile.write(pr_type)
+        sys.exit(0)
+
+    def run_analyze(self):
         diff_data = self.get_PR_diff()
         pr_type = self.determine_pr_type(diff_data)
         changes = self.get_diff_hunks(diff_data, pr_type)
@@ -314,17 +321,21 @@ class AnalyzePRForReqs():
 if __name__ == "__main__":
     argv = sys.argv
 
-    if argc := len(sys.argv) < 8:
-        print(f"Usage: {argv[0]} GITHUB_REPOSITORY PR_NUM VUL_THRESHOLD MAL_THRESHOLD ENG_THRESHOLD LIC_THRESHOLD AUT_THRESHOLD")
+    if argc := len(sys.argv) < 9:
+        print(f"Usage: {argv[0]} ACTION:(analyze|pr_type) GITHUB_REPOSITORY PR_NUM VUL_THRESHOLD MAL_THRESHOLD ENG_THRESHOLD LIC_THRESHOLD AUT_THRESHOLD")
         sys.exit(11)
 
-    repo = argv[1]
-    pr_num = argv[2]
-    vul = argv[3]
-    mal = argv[4]
-    eng = argv[5]
-    lic = argv[6]
-    aut = argv[7]
+    action = argv[1]
+    repo = argv[2]
+    pr_num = argv[3]
+    if action == "pr_type":
+        a = AnalyzePRForReqs(repo, pr_num, 0, 0, 0, 0, 0)
+        a.run_prtype()
+    vul = argv[4]
+    mal = argv[5]
+    eng = argv[6]
+    lic = argv[7]
+    aut = argv[8]
 
     a = AnalyzePRForReqs(repo, pr_num, vul, mal, eng, lic, aut)
-    a.run()
+    a.run_analyze()

@@ -71,15 +71,6 @@ runs:
         echo "PHYLUM_LABEL = ${PHYLUM_LABEL}"
         echo "EVENT NUMBER = ${{ github.event.number }}"
 
-    - name: Analyze project lockfile
-      shell: bash
-      run: |
-        export PATH="$HOME/.phylum:$PATH"
-        pushd $GITHUB_WORKSPACE || exit 11
-          phylum analyze -l $PHYLUM_LABEL requirements.txt --verbose --json > ~/phylum_analysis.json
-          echo "[*] Analyzed requirements.txt under label ${PHYLUM_LABEL} and wrote results to ~/phylum_analysis.json"
-        popd
-
     - uses: technote-space/get-diff-action@v4
       with:
         FILES: |
@@ -103,11 +94,33 @@ runs:
 
     # - name: Setup tmate session
       # uses: mxschmitt/action-tmate@v3
+    - name: run analyze.py pr_type
+      shell: bash
+      run: python $GITHUB_ACTION_PATH/analyze.py "pr_type" $GITHUB_REPOSITORY ${{ github.event.number }}
+
+    - id: get-prtype
+      shell: bash
+      run: |
+        ret="$(cat ~/prtype.txt)"
+        ret="${ret//'%'/'%25'}"
+        ret="${ret//$'\n'/'%0A'}"
+        ret="${ret//$'\r'/'%0A'}"
+        echo "::set-output name=prtype::$ret"
+
+    #TODO: fix this, need to get the changed file in PR to submit for analysis
+    - name: Analyze project lockfile
+      shell: bash
+      run: |
+        export PATH="$HOME/.phylum:$PATH"
+        pushd $GITHUB_WORKSPACE || exit 11
+          # phylum analyze -l $PHYLUM_LABEL requirements.txt --verbose --json > ~/phylum_analysis.json
+          phylum analyze -l $PHYLUM_LABEL ${{ steps.get-prtype.outputs.prtype }} --verbose --json > ~/phylum_analysis.json
+          echo "[*] Analyzed ${{ steps.get-prtype.outputs.prtype }} under label ${PHYLUM_LABEL} and wrote results to ~/phylum_analysis.json"
+        popd
 
     - name: python script analyze.py
       shell: bash
-      # run: python $GITHUB_ACTION_PATH/analyze_updated_requirements_txt.py $GITHUB_REPOSITORY $PR_NUM $VUL $MAL $ENG $LIC $AUT
-      run: python $GITHUB_ACTION_PATH/analyze.py $GITHUB_REPOSITORY ${{ github.event.number }} ${{ inputs.vul_threshold }} ${{ inputs.mal_threshold }} ${{ inputs.eng_threshold }} ${{ inputs.lic_threshold }} ${{ inputs.aut_threshold }}
+      run: python $GITHUB_ACTION_PATH/analyze.py "analyze" $GITHUB_REPOSITORY ${{ github.event.number }} ${{ inputs.vul_threshold }} ${{ inputs.mal_threshold }} ${{ inputs.eng_threshold }} ${{ inputs.lic_threshold }} ${{ inputs.aut_threshold }}
 
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3

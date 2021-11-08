@@ -11,6 +11,7 @@ Enables users to configure thresholds for each of Phylum's five risk domain scor
 ### Requirements:
 - active Phylum account ([Register here](https://app.phylum.io/auth/registration))
 - repository secrets: PHYLUM_USER and PHYLUM_PASS
+- concrete package versions (only applicable for requirements.txt)
 
 ## Getting Started
 ```yaml

@@ -71,12 +71,14 @@ runs:
         echo "PHYLUM_LABEL = ${PHYLUM_LABEL}"
         echo "EVENT NUMBER = ${{ github.event.number }}"
 
+    #TODO: is this needed?
     - uses: technote-space/get-diff-action@v4
       with:
         FILES: |
           requirements.txt
           #pyproject.toml
 
+    #TODO: is this needed?
     - name: Get requirements.txt git diff
       shell: bash
       run: git diff --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} > ~/DIFF
@@ -89,11 +91,17 @@ runs:
     - name: install python dependencies
       shell: bash
       run: |
-        pip install requests
+        #pip install requests
         pip install unidiff
 
     # - name: Setup tmate session
       # uses: mxschmitt/action-tmate@v3
+
+    # handled in analyze.py now
+    # - name: Get target branch
+      # shell: bash
+      # run: git fetch origin
+
     - name: run analyze.py pr_type
       shell: bash
       run: python $GITHUB_ACTION_PATH/analyze.py "pr_type" $GITHUB_REPOSITORY ${{ github.event.number }}

@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: analyze-pr-test
-        uses: peterjmorgan/phylum-analyze-pr-action@v0.90
+        uses: peterjmorgan/phylum-analyze-pr-action@v1.0
         with:
           vul_threshold: 0.6
           mal_threshold: 0.6

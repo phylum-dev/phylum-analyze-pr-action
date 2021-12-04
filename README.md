@@ -37,10 +37,11 @@ jobs:
 - requirements.txt (Python PyPI)
 - package-lock.json (JavaScript/TypeScript NPM)
 - yarn.lock (JavaScript/TypeScript NPM)
+- Gemfile.lock (Ruby Rubygems/Bundler)
 
 ### Requirements:
 - active Phylum account ([Register here](https://app.phylum.io/auth/registration))
-- repository secrets: PHYLUM_USER and PHYLUM_PASS
+- repository secrets defined: PHYLUM_USER and PHYLUM_PASS
 - concrete package versions (only applicable for requirements.txt)
 - existing Phylum project for repository (`.phylum_project` must be present)
 

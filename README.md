@@ -1,7 +1,9 @@
 # phylum-analyze-pr-action
 A GitHub Action to automatically analyze Pull Requests for changes to package manager lockfiles using Phylum.
 
-Enables users to configure thresholds for each of Phylum's five risk domain scores. If a package risk domain score is below the threshold, the action will fail the check on the pull request. When packages fail the risk analysis, a comment is created on the PR to summarize the issues.
+Phylum provides a complete risk analyis of open-source packages (read: "untrusted software from random Internet strangers"). Phylum evolved forward from legacy SCA tools to defend from supply-chain malware, malicious open-source authors, and engineering risk, in addtion to software vulnerabilities and license risks. To learn more, please see [our website](https://phylum.io)
+
+This action enables users to configure thresholds for each of Phylum's five risk domain scores. If a package risk domain score is below the threshold, the action will fail the check on the pull request. When packages fail the risk analysis, a comment is created on the PR to summarize the issues.
 
 ## Features
 - configurable risk domain thresholds

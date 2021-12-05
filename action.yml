@@ -42,47 +42,16 @@ runs:
       run: |
         result=$(find . -maxdepth 1 -iname ".phylum_project")
         if [[ -n $result ]]; then
-          echo "Phylum project found: $result"
+          echo "[*] Phylum project found: $result"
         else
           echo "[ERROR] Phylum project file not found"
           exit 11
-        fi
-
-    - name: Check and set GITHUB_HEAD_REF env variable
-      shell: bash
-      run: |
-        if [[ -z $GITHUB_HEAD_REF ]]; then
-          echo "GITHUB_HEAD_REF isn't set"
-          echo GITHUB_HEAD_REF="example" >> $GITHUB_ENV
-          echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
-        else
-          echo "GITHUB_HEAD_REF is set: ${GITHUB_HEAD_REF}"
         fi
 
     - name: Generate Phylum label
       shell: bash
       run: |
         echo PHYLUM_LABEL="GHA-PR${{ github.event.number }}-${GITHUB_HEAD_REF}" >> $GITHUB_ENV
-
-    - name: check env vars
-      shell: bash
-      run: |
-        echo "GITHUB_HEAD_REF = ${GITHUB_HEAD_REF}"
-        echo "PHYLUM_LABEL = ${PHYLUM_LABEL}"
-        echo "EVENT NUMBER = ${{ github.event.number }}"
-
-    #TODO: is this needed?
-    - uses: technote-space/get-diff-action@v4
-      with:
-        FILES: |
-          requirements.txt
-          #pyproject.toml
-
-    #TODO: is this needed?
-    - name: Get requirements.txt git diff
-      shell: bash
-      run: git diff --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} > ~/DIFF
-      if: env.GIT_DIFF
 
     - uses: actions/setup-python@v2
       with:
@@ -91,16 +60,7 @@ runs:
     - name: install python dependencies
       shell: bash
       run: |
-        #pip install requests
         pip install unidiff
-
-    # - name: Setup tmate session
-      # uses: mxschmitt/action-tmate@v3
-
-    # handled in analyze.py now
-    # - name: Get target branch
-      # shell: bash
-      # run: git fetch origin
 
     - name: run analyze.py pr_type
       shell: bash
@@ -115,13 +75,11 @@ runs:
         ret="${ret//$'\r'/'%0A'}"
         echo "::set-output name=prtype::$ret"
 
-    #TODO: fix this, need to get the changed file in PR to submit for analysis
     - name: Analyze project lockfile
       shell: bash
       run: |
         export PATH="$HOME/.phylum:$PATH"
         pushd $GITHUB_WORKSPACE || exit 11
-          # phylum analyze -l $PHYLUM_LABEL requirements.txt --verbose --json > ~/phylum_analysis.json
           phylum analyze -l $PHYLUM_LABEL ${{ steps.get-prtype.outputs.prtype }} --verbose --json > ~/phylum_analysis.json
           echo "[*] Analyzed ${{ steps.get-prtype.outputs.prtype }} under label ${PHYLUM_LABEL} and wrote results to ~/phylum_analysis.json"
         popd
@@ -129,9 +87,6 @@ runs:
     - name: python script analyze.py
       shell: bash
       run: python $GITHUB_ACTION_PATH/analyze.py "analyze" $GITHUB_REPOSITORY ${{ github.event.number }} ${{ inputs.vul_threshold }} ${{ inputs.mal_threshold }} ${{ inputs.eng_threshold }} ${{ inputs.lic_threshold }} ${{ inputs.aut_threshold }}
-
-    # - name: Setup tmate session
-      # uses: mxschmitt/action-tmate@v3
 
     - id: get-returncode
       shell: bash

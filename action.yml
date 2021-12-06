@@ -75,6 +75,13 @@ runs:
         ret="${ret//$'\r'/'%0A'}"
         echo "::set-output name=prtype::$ret"
 
+    - name: return 0 for non-execution
+      shell: bash
+      if: "contains(steps.get-returncode.outputs.prtype, 'NA')"
+      run: |
+        echo 'exiting with 0 since package dependency files were not modified'
+        exit 0
+
     - name: Analyze project lockfile
       shell: bash
       run: |

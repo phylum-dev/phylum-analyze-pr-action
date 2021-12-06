@@ -361,6 +361,8 @@ class AnalyzePRForReqs():
     def run_prtype(self):
         diff_data = self.new_get_PR_diff()
         pr_type = self.determine_pr_type(diff_data)
+        if pr_type is None:
+            pr_type = "NA"
         # with open('/home/runner/prtype.txt','w') as outfile:
         with open(FILE_PATHS.get("pr_type"),'w') as outfile:
             outfile.write(pr_type)

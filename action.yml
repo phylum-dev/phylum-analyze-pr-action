@@ -97,6 +97,9 @@ runs:
           echo "[*] Analyzed ${{ steps.get-prtype.outputs.prtype }} under label ${PHYLUM_LABEL} and wrote results to ~/phylum_analysis.json"
         popd
 
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+
     - name: python script analyze.py
       shell: bash
       if: "!contains(steps.get-prtype.outputs.prtype, 'NA')"

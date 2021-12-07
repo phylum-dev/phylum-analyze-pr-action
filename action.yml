@@ -37,6 +37,7 @@ runs:
       with:
         phylum_username: ${{ inputs.phylum_username }}
         phylum_password: ${{ inputs.phylum_password }}
+
     - name: Check for existing project
       shell: bash
       run: |
@@ -79,15 +80,17 @@ runs:
         ret="${ret//$'\r'/'%0A'}"
         echo "::set-output name=prtype::$ret"
 
-    - name: return 0 for non-execution
+    - id: should-proceed
       shell: bash
       if: "contains(steps.get-prtype.outputs.prtype, 'NA')"
       run: |
         echo 'exiting with 0 since package dependency files were not modified'
         exit 0
+        echo '0' > ~/returncode.txt
 
     - name: Analyze project lockfile
       shell: bash
+      if: "!contains(steps.get-prtype.outputs.prtype, 'NA')"
       run: |
         export PATH="$HOME/.phylum:$PATH"
         pushd $GITHUB_WORKSPACE || exit 11
@@ -97,6 +100,7 @@ runs:
 
     - name: python script analyze.py
       shell: bash
+      if: "!contains(steps.get-prtype.outputs.prtype, 'NA')"
       run: python $GITHUB_ACTION_PATH/analyze.py "analyze" $GITHUB_REPOSITORY ${{ github.event.number }} ${{ inputs.vul_threshold }} ${{ inputs.mal_threshold }} ${{ inputs.eng_threshold }} ${{ inputs.lic_threshold }} ${{ inputs.aut_threshold }}
 
     - id: get-returncode

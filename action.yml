@@ -66,6 +66,10 @@ runs:
       shell: bash
       run: python $GITHUB_ACTION_PATH/analyze.py "pr_type" $GITHUB_REPOSITORY ${{ github.event.number }}
 
+    - name: cat prtype
+      shell: bash
+      run: cat ~/prtype.txt
+
     - id: get-prtype
       shell: bash
       run: |

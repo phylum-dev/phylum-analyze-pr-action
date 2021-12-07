@@ -85,7 +85,6 @@ runs:
       if: "contains(steps.get-prtype.outputs.prtype, 'NA')"
       run: |
         echo 'exiting with 0 since package dependency files were not modified'
-        exit 0
         echo '0' > ~/returncode.txt
 
     - name: Analyze project lockfile

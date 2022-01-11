@@ -22,11 +22,8 @@ inputs:
   aut_threshold:
     description: "Author risk score threshold value"
     required: true
-  phylum_username:
-    description: "Phylum username"
-    required: true
-  phylum_password:
-    description: "Phylum password"
+  phylum_token:
+    description: "Phylum token"
     required: true
   phylum_version:
     description: "Phylum version"
@@ -38,10 +35,12 @@ runs:
   using: "composite"
   steps:
     - id: phylum-test
-      uses: phylum-dev/install-phylum-latest-action@master
+      # uses: peterjmorgan/install-phylum-latest-action@master
+      uses: peterjmorgan/install-phylum-latest-action@1.2.0-rc1
       with:
-        phylum_username: ${{ inputs.phylum_username }}
-        phylum_password: ${{ inputs.phylum_password }}
+        # phylum_username: ${{ inputs.phylum_username }}
+        # phylum_password: ${{ inputs.phylum_password }}
+        phylum_token: ${{ inputs.phylum_token }}
         phylum_version: ${{ inputs.phylum_version }}
 
     - name: Check for existing project

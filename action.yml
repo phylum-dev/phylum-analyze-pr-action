@@ -36,7 +36,7 @@ runs:
   steps:
     - id: phylum-test
       # uses: peterjmorgan/install-phylum-latest-action@master
-      uses: peterjmorgan/install-phylum-latest-action@1.2.0-rc1
+      uses: phylum-dev/install-phylum-latest-action@1.2.0-rc1
       with:
         # phylum_username: ${{ inputs.phylum_username }}
         # phylum_password: ${{ inputs.phylum_password }}

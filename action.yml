@@ -38,7 +38,7 @@ runs:
   using: "composite"
   steps:
     - id: phylum-test
-      uses: phylum-dev/install-phylum-latest-action@brad-version-variable
+      uses: phylum-dev/install-phylum-latest-action@master
       with:
         phylum_username: ${{ inputs.phylum_username }}
         phylum_password: ${{ inputs.phylum_password }}

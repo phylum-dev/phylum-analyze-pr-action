@@ -28,15 +28,21 @@ inputs:
   phylum_password:
     description: "Phylum password"
     required: true
+    #phylum_version:
+          #description: "Phylum version"
+    #required: false
+    #default: null
+
 
 runs:
   using: "composite"
   steps:
     - id: phylum-test
-      uses: peterjmorgan/install-phylum-latest-action@master
+      uses: phylum-dev/install-phylum-latest-action@brad-version-variable
       with:
         phylum_username: ${{ inputs.phylum_username }}
         phylum_password: ${{ inputs.phylum_password }}
+        #phylum_version: ${{ inputs.phylum_version }}
 
     - name: Check for existing project
       shell: bash

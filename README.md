@@ -31,8 +31,7 @@ jobs:
           eng_threshold: 0.6
           lic_threshold: 0.6
           aut_threshold: 0.6
-          phylum_username: ${{ secrets.PHYLUM_USER }}
-          phylum_password: ${{ secrets.PHYLUM_PASS }}
+          phylum_token: ${{ secrets.PHYLUM_TOKEN }}
 ```
 
 ### Supported lockfiles:
@@ -43,7 +42,7 @@ jobs:
 
 ### Requirements:
 - active Phylum account ([Register here](https://app.phylum.io/auth/registration))
-- repository secrets defined: PHYLUM_USER and PHYLUM_PASS
+- repository secret defined: PHYLUM_TOKEN (extracted from Phylum CLI configuration file "offline_access")
 - concrete package versions (only applicable for requirements.txt)
 - existing Phylum project for repository (`.phylum_project` must be present)
 

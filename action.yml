@@ -92,8 +92,8 @@ runs:
         echo 'exiting with 0 since package dependency files were not modified'
         echo '0' > $HOME/returncode.txt
 
-    # - name: Setup tmate session
-      # uses: mxschmitt/action-tmate@v3
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
 
     - name: Analyze project lockfile
       shell: bash

@@ -35,11 +35,8 @@ runs:
   using: "composite"
   steps:
     - id: phylum-test
-      # uses: peterjmorgan/install-phylum-latest-action@master
       uses: phylum-dev/install-phylum-latest-action@v1.3
       with:
-        # phylum_username: ${{ inputs.phylum_username }}
-        # phylum_password: ${{ inputs.phylum_password }}
         phylum_token: ${{ inputs.phylum_token }}
         phylum_version: ${{ inputs.phylum_version }}
 
@@ -91,9 +88,6 @@ runs:
       run: |
         echo 'exiting with 0 since package dependency files were not modified'
         echo '0' > $HOME/returncode.txt
-
-    # - name: Setup tmate session
-      # uses: mxschmitt/action-tmate@v3
 
     - name: Analyze project lockfile
       shell: bash
@@ -150,7 +144,6 @@ runs:
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: ${{ steps.get-comment-body.outputs.body }}
-        # comment-author: 'Phylum[bot]'
 
     - name: return 1 for risk analysis failure
       shell: bash

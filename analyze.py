@@ -334,13 +334,13 @@ class AnalyzePRForReqs():
     def build_issues_list(self, package_json, issue_flags: list):
         issues = list()
         pkg_issues = package_json.get("issues")
-        pkg_vulns = package_json.get("vulnerabilities")
+        # pkg_vulns = package_json.get("vulnerabilities")
 
-        if 'vul' in issue_flags:
-            for vuln in pkg_vulns:
-                risk_level = vuln.get("risk_level")
-                title = vuln.get("title")
-                issues.append(('VUL', risk_level,title))
+        #  if 'vul' in issue_flags:
+            #  for vuln in pkg_vulns:
+                #  risk_level = vuln.get("risk_level")
+                #  title = vuln.get("title")
+                #  issues.append(('VUL', risk_level,title))
 
         for flag in issue_flags:
             for pkg_issue in pkg_issues:

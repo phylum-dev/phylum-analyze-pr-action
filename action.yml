@@ -22,11 +22,8 @@ inputs:
   aut_threshold:
     description: "Author risk score threshold value"
     required: true
-  phylum_username:
-    description: "Phylum username"
-    required: true
-  phylum_password:
-    description: "Phylum password"
+  phylum_token:
+    description: "Phylum token"
     required: true
   phylum_version:
     description: "Phylum version"
@@ -38,10 +35,9 @@ runs:
   using: "composite"
   steps:
     - id: phylum-test
-      uses: phylum-dev/install-phylum-latest-action@master
+      uses: phylum-dev/install-phylum-latest-action@v1.3
       with:
-        phylum_username: ${{ inputs.phylum_username }}
-        phylum_password: ${{ inputs.phylum_password }}
+        phylum_token: ${{ inputs.phylum_token }}
         phylum_version: ${{ inputs.phylum_version }}
 
     - name: Check for existing project
@@ -103,8 +99,6 @@ runs:
           echo "[*] Analyzed ${{ steps.get-prtype.outputs.prtype }} under label ${PHYLUM_LABEL} and wrote results to ~/phylum_analysis.json"
         popd
 
-    # - name: Setup tmate session
-      # uses: mxschmitt/action-tmate@v3
 
     - name: python script analyze.py
       shell: bash
@@ -150,7 +144,6 @@ runs:
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: ${{ steps.get-comment-body.outputs.body }}
-        # comment-author: 'Phylum[bot]'
 
     - name: return 1 for risk analysis failure
       shell: bash

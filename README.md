@@ -43,6 +43,11 @@ jobs:
 ### Requirements:
 - active Phylum account ([Register here](https://app.phylum.io/auth/registration))
 - repository secret defined: PHYLUM_TOKEN (extracted from Phylum CLI configuration file "offline_access")
+  1. Ensure you've updated the Phylum CLI on a local installation to version `1.2.0`
+  2. Successfully authenticate using Phylum CLI. This will ensure the token is populated in the phylum config file ~/.phylum/settings.yaml in stanza offline_access
+  3. Copy the token value in the offline_access stanza
+  4. Create a new GitHub secret in the desired repository. This can be done through the GitHub web UI or using the gh command line tool: gh secret set PHYLUM_TOKEN -b <token_value>
+  5. Optionally, you can remove the antiquated PHYLUM_USER and PHYLUM_PASS GitHub secrets as they are no longer used.
 - concrete package versions (only applicable for requirements.txt)
 - existing Phylum project for repository (`.phylum_project` must be present)
 

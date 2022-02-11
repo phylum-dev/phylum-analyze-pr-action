@@ -392,7 +392,7 @@ class AnalyzePRForReqs():
 
         output = str
         # Write pr_comment.txt only if the analysis failed and all pkgvers are completed(self.gbl_result == 1)
-        if self.gbl_failed == True and self.gbl_incomplete == False
+        if self.gbl_failed == True and self.gbl_incomplete == False:
             returncode = 1
             # if this is a repeated test of previously incomplete packages, set the comment based on states of failed, not incomplete and previous
             if self.previous_incomplete == True:

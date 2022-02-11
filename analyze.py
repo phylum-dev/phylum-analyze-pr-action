@@ -7,16 +7,11 @@ from unidiff import PatchSet
 import pathlib
 from subprocess import run
 
-# TODO:
-# [DONE]    1. Clearly document which environment variables are used
-# [DONE]    2. Don't assume PRs are going into master branch, need to get the target
-# [DONE]        3. Add Gmefile support
-# [DONE]        4. Document file paths
-
 ENV_KEYS = [
     "GITHUB_SHA", # for get_PR_diff; this is the SHA of the commit for the branch being merged
     "GITHUB_BASE_REF", # for get_PR_diff; this is the target branch of the merge
     "GITHUB_WORKSPACE", # for get_PR_diff; this is where the Pull Request code base is
+    "PREVIOUS_INCOMPLETE", # for denoting that this was previously run, and had incomplete packages
 ]
 
 FILE_PATHS = {
@@ -25,6 +20,35 @@ FILE_PATHS = {
     "returncode": "/home/runner/returncode.txt",
     "pr_comment": "/home/runner/pr_comment.txt",
 }
+
+'''
+    States on returncode
+    0 = No comment
+    1 = FAILED_COMMENT
+    5 = INCOMPLETE_COMMENT then:
+        4 = COMPLETE_SUCCESS_COMMENT
+        1 = COMPLETE_FAILED_COMMENT
+'''
+
+# Headers for distinct comment types
+DETAILS_DROPDOWN = "<details>\n<summary>Background</summary>\n<br />\nThis repository uses a GitHub Action to automatically analyze the risk of new dependencies added to requirements.txt via Pull Request. An administrator of this repository has set score requirements for Phylum's five risk domains.<br /><br />\nIf you see this comment, one or more dependencies added to the requirements.txt file in this Pull Request have failed Phylum's risk analysis.\n</details>\n\n"
+
+INCOMPLETE_COMMENT = "## Phylum OSS Supply Chain Risk Analysis - INCOMPLETE\n\n"
+INCOMPLETE_COMMENT += "This pull request contains TKTK package versions Phylum has not yet processed, preventing a complete risk analysis. Phylum is processing these packages currently and should complete within 30 minutes. Please wait for at least 30 minutes, then re-run the GitHub Check pertaining to `phylum-analyze-pr-action`.\n\n"
+INCOMPLETE_COMMENT += DETAILS_DROPDOWN
+
+COMPLETE_FAILED_COMMENT = "## Phylum OSS Supply Chain Risk Analysis - COMPLETE\n\n"
+COMPLETE_FAILED_COMMENT += "The Phylum risk analysis is now complete.\n\n"
+COMPLETE_FAILED_COMMENT += DETAILS_DROPDOWN
+
+COMPLETE_SUCCESS_COMMENT = "## Phylum OSS Supply Chain Risk Analysis - COMPLETE\n\n"
+COMPLETE_SUCCESS_COMMENT += "The Phylum risk analysis is now complete and did not identify any issues for this PR.\n\n"
+COMPLETE_SUCCESS_COMMENT += DETAILS_DROPDOWN
+
+FAILED_COMMENT = "## Phylum OSS Supply Chain Risk Analysis\n\n"
+FAILED_COMMENT +=DETAILS_DROPDOWN
+
+
 
 class AnalyzePRForReqs():
     def __init__(self, repo, pr_num, vul, mal, eng, lic, aut):
@@ -38,8 +62,10 @@ class AnalyzePRForReqs():
         self.gbl_failed = False
         self.gbl_incomplete = False
         self.incomplete_pkgs = list()
+        self.previous_incomplete = False
         self.env = dict()
         self.get_env_vars()
+
 
     def get_env_vars(self):
         for key in ENV_KEYS:
@@ -48,7 +74,9 @@ class AnalyzePRForReqs():
                 self.env[key] = temp
             else:
                 print(f"[ERROR] could not get value for os.environ.get({key})")
-                sys.exit(11)
+                # sys.exit(11) #TODO: re-enable
+        if self.env.get("PREVIOUS_INCOMPLETE"):
+            self.previous_incomplete = True
         return
 
     def new_get_PR_diff(self):
@@ -226,24 +254,7 @@ class AnalyzePRForReqs():
             pkg_ver_tup = self.parse_gemfile_lock(changes)
             return pkg_ver_tup
 
-        #  no_version = 0
-        #  pkg_ver = dict()
-        #  pkg_ver_tup = list()
-
-        #  for line in changes:
-            #  if line == '\n':
-                #  continue
-            #  if match := re.match(pat, line):
-                #  pkg,ver = match.groups()
-                #  pkg_ver[pkg] = ver
-                #  pkg_ver_tup.append((pkg,ver))
-            #  else:
-                #  no_version += 1
-
-        #  if no_version > 0:
-            #  print(f"[ERROR] Found entries that do not specify version, preventing analysis. Exiting")
-            #  sys.exit(11)
-
+        # shouldn't get here
         return pkg_ver_tup
 
     ''' Read phylum_analysis.json file '''
@@ -379,31 +390,42 @@ class AnalyzePRForReqs():
         project_url = self.get_project_url(phylum_json)
         returncode = 0
 
-        # Write pr_comment.txt only if the analysis failed (self.gbl_result == 1)
-        if self.gbl_failed:
-            returncode += 1
+        output = str
+        # Write pr_comment.txt only if the analysis failed and all pkgvers are completed(self.gbl_result == 1)
+        if self.gbl_failed == True and self.gbl_incomplete == False
+            returncode = 1
+            # if this is a repeated test of previously incomplete packages, set the comment based on states of failed, not incomplete and previous
+            if self.previous_incomplete == True:
+                output = COMPLETE_FAILED_COMMENT
+            else:
+                output = FAILED_COMMENT
 
-            header = "## Phylum OSS Supply Chain Risk Analysis\n\n"
-            header += "<details>\n<summary>Background</summary>\n<br />\nThis repository uses a GitHub Action to automatically analyze the risk of new dependencies added to requirements.txt via Pull Request. An administrator of this repository has set score requirements for Phylum's five risk domains.<br /><br />\nIf you see this comment, one or more dependencies added to the requirements.txt file in this Pull Request have failed Phylum's risk analysis.\n</details>\n\n"
+            # write data from risk analysis
+            for line in risk_data:
+                if line:
+                    output += line
 
-            # with open('/home/runner/pr_comment.txt','w') as outfile:
-            with open(FILE_PATHS.get("pr_comment"),'w') as outfile:
-                outfile.write(header)
-                for line in risk_data:
-                    if line:
-                        outfile.write(line)
-                outfile.write(f"\n[View this project in Phylum UI]({project_url})")
-                print(f"[DEBUG] pr_comment.txt: wrote {outfile.tell()} bytes")
         # If any packages are incomplete, add 5 to the returncode so we know the results are incomplete
         if self.gbl_incomplete == True:
+            returncode = 5
             print(f"[DEBUG] {len(self.incomplete_pkgs)} packages were incomplete as of the analysis job")
-            returncode += 5
+            output = INCOMPLETE_COMMENT.replace("TKTK",len(self.incomplete_pkgs))
+
+        if self.gbl_failed == False and self.gbl_incomplete == False and self.previous_incomplete == True:
+            returncode = 4
+            print(f"[DEBUG] failed=False incomplete=False previous_incomplete=True")
+            output = COMPLETE_SUCCESS_COMMENT
+
 
         # with open('/home/runner/returncode.txt','w') as resultout:
         with open(FILE_PATHS.get("returncode"),'w') as resultout:
             resultout.write(str(returncode))
             print(f"[DEBUG] returncode: wrote {str(returncode)}")
 
+        with open(FILE_PATHS.get("pr_comment"),'w') as outfile:
+            outfile.write(output)
+            outfile.write(f"\n[View this project in Phylum UI]({project_url})")
+            print(f"[DEBUG] pr_comment.txt: wrote {outfile.tell()} bytes")
 
 if __name__ == "__main__":
     argv = sys.argv

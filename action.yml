@@ -29,6 +29,14 @@ inputs:
     description: "Phylum version"
     required: false
     default: '0'
+  incomplete_package_strategy:
+    description: "Method for resolving incomplete packages"
+    required: false
+    default: "pass_with_comment"
+  invoke_test_matrix:
+    description: "Only used for testing"
+    required: false
+    default: false
 
 
 runs:
@@ -39,6 +47,20 @@ runs:
       with:
         phylum_token: ${{ inputs.phylum_token }}
         phylum_version: ${{ inputs.phylum_version }}
+
+    - name: Check for previous comment
+      uses: peter-evans/find-comment@v1
+      id: fc
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body-includes: INCOMPLETE
+
+    - name: Store result of id=fc in environment
+      shell: bash
+      if: "contains(steps.fc.outputs.comment-body, 'Phylum')"
+      run: |
+        echo "storing PREVIOUS_INCOMPLETE"
+        echo PREVIOUS_INCOMPLETE=1 >> $GITHUB_ENV
 
     - name: Check for existing project
       shell: bash
@@ -99,6 +121,11 @@ runs:
           echo "[*] Analyzed ${{ steps.get-prtype.outputs.prtype }} under label ${PHYLUM_LABEL} and wrote results to ~/phylum_analysis.json"
         popd
 
+    - name: invoke test matrix
+      shell: bash
+      if: "inputs.invoke-test-matrix == true"
+      run: |
+        python $GITHUB_ACTION_PATH/test_matrix.py
 
     - name: python script analyze.py
       shell: bash
@@ -114,13 +141,7 @@ runs:
         ret="${ret//$'\r'/'%0A'}"
         echo "::set-output name=ret::$ret"
 
-    - name: return 5 for incomplete packages
-      shell: bash
-      if: "contains(steps.get-returncode.outputs.ret, '5')"
-      run: |
-        echo 'exiting with 5 for incomplete packages'
-        exit 5
-
+    # This will catch SUCCESS cases
     - name: return 0 for success
       shell: bash
       if: "contains(steps.get-returncode.outputs.ret, '0')"
@@ -129,7 +150,9 @@ runs:
         exit 0
 
     - id: get-comment-body
-      if: "contains(steps.get-returncode.outputs.ret, '1')"
+      # this will have to check for 1 or 5 AND if on the second run
+      # if: "contains(steps.get-returncode.outputs.ret, '1')"
+      if: "steps.get-returncode.outputs.ret > 0"
       shell: bash
       run: |
         body="$(cat ~/pr_comment.txt)"
@@ -139,12 +162,24 @@ runs:
         echo "::set-output name=body::$body"
 
     - name: Set comment
-      if: "contains(steps.get-returncode.outputs.ret, '1')"
+      # This will have to check for 1 or 5
+      # Could check for > 0 ?
+      #if: "contains(steps.get-returncode.outputs.ret, '1')"
+      if: "steps.get-returncode.outputs.ret > 0"
       uses: peter-evans/create-or-update-comment@v1
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: ${{ steps.get-comment-body.outputs.body }}
 
+    # This will catch INCOMPLETE and COMPLETE_SUCCESS
+    - name: handle ret values of 4 or 5
+      shell: bash
+      if: "steps.get-returncode.outputs.ret >= 4"
+      run: |
+        echo 'exiting with 0 for success - ret = ${{ steps.get-returncode.outputs.ret }}'
+        exit 0
+
+    # This will catch FAILURE and COMPLETE_FAILURE
     - name: return 1 for risk analysis failure
       shell: bash
       if: "contains(steps.get-returncode.outputs.ret, '1')"

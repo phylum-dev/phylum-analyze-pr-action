@@ -123,7 +123,7 @@ runs:
 
     - name: invoke test matrix
       shell: bash
-      if: "inputs.invoke_test_matrix == true"
+      if: "contains(inputs.invoke_test_matrix, 'true')"
       run: |
         python $GITHUB_ACTION_PATH/test_matrix.py
 

@@ -12,11 +12,11 @@ ENV_KEYS = [
 ]
 
 FILES = {
-    "FAIL_FILE": Path("./testing/fail_phylum.json"),
-    "INCOMPLETE_FILE": Path("./testing/incomplete_phylum.json"),
-    "COMPLETE_FAIL_FILE": Path("./testing/complete_fail_phylum.json"),
-    "COMPLETE_SUCCESS_FILE": Path("./testing/complete_success_phylum.json"),
-    "SUCCESS_FILE": Path("./testing/success_phylum.json"),
+    "FAIL_FILE": Path("./testing/fail_phylum.json").resolve(),
+    "INCOMPLETE_FILE": Path("./testing/incomplete_phylum.json").resolve(),
+    "COMPLETE_FAIL_FILE": Path("./testing/complete_fail_phylum.json").resolve(),
+    "COMPLETE_SUCCESS_FILE": Path("./testing/complete_success_phylum.json").resolve(),
+    "SUCCESS_FILE": Path("./testing/success_phylum.json").resolve(),
 }
 
 '''

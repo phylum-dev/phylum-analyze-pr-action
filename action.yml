@@ -121,6 +121,10 @@ runs:
           echo "[*] Analyzed ${{ steps.get-prtype.outputs.prtype }} under label ${PHYLUM_LABEL} and wrote results to ~/phylum_analysis.json"
         popd
 
+
+    - name: tmate
+      uses: mxschmitt/action-tmate@v3
+
     - name: invoke test matrix
       shell: bash
       if: "contains(inputs.invoke_test_matrix, 'true')"

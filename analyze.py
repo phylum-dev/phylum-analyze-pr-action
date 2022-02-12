@@ -390,7 +390,7 @@ class AnalyzePRForReqs():
         project_url = self.get_project_url(phylum_json)
         returncode = 0
 
-        output = str
+        output = ""
         # Write pr_comment.txt only if the analysis failed and all pkgvers are completed(self.gbl_result == 1)
         if self.gbl_failed == True and self.gbl_incomplete == False:
             returncode = 1

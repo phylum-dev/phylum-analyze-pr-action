@@ -11,12 +11,14 @@ ENV_KEYS = [
     "GITHUB_RUN_ID",
 ]
 
+GHAP = os.environ.get("GITHUB_ACTION_PATH")
+
 FILES = {
-    "FAIL_FILE": Path("./testing/fail_phylum.json").resolve(),
-    "INCOMPLETE_FILE": Path("./testing/incomplete_phylum.json").resolve(),
-    "COMPLETE_FAIL_FILE": Path("./testing/complete_fail_phylum.json").resolve(),
-    "COMPLETE_SUCCESS_FILE": Path("./testing/complete_success_phylum.json").resolve(),
-    "SUCCESS_FILE": Path("./testing/success_phylum.json").resolve(),
+    "FAIL_FILE": Path(GHAP + "/testing/fail_phylum.json").resolve(),
+    "INCOMPLETE_FILE": Path(GHAP + "/testing/incomplete_phylum.json").resolve(),
+    "COMPLETE_FAIL_FILE": Path(GHAP + "/testing/complete_fail_phylum.json").resolve(),
+    "COMPLETE_SUCCESS_FILE": Path(GHAP + "/testing/complete_success_phylum.json").resolve(),
+    "SUCCESS_FILE": Path(GHAP + "/testing/success_phylum.json").resolve(),
 }
 
 '''

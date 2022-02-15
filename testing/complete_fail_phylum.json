@@ -1,18 +1,18 @@
 {
-  "job_id": "12e1cef5-da10-4349-b6bb-7bdb95183577",
+  "job_id": "f8df2080-436b-4b65-8150-592c20068ecb",
   "ecosystem": "python",
   "user_id": "b5daa649-179c-47f2-a832-15b4f691079d",
   "user_email": "tester@phylum.io",
-  "created_at": 1644692731426,
+  "created_at": 1644946542736,
   "status": "complete",
-  "score": 0.83,
+  "score": 0.84,
   "pass": true,
   "msg": "Project met threshold requirements",
   "action": "none",
   "num_incomplete": 0,
-  "last_updated": 1644690905312,
-  "project": "a66f9256-4aa2-4648-824b-aa5e02546914",
-  "project_name": "throwaway-reqs",
+  "last_updated": 1644942827915,
+  "project": "a67a12e4-63c6-4f87-a898-4b5b97edcab7",
+  "project_name": "throwaway-reqs2",
   "label": "uncategorized",
   "thresholds": {
     "author": 0.0,
@@ -25,30 +25,123 @@
   "packages": [
     {
       "name": "requests",
-      "version": "2.20.0",
+      "version": "2.6.1",
       "status": "complete",
-      "last_updated": 1644690905312,
+      "last_updated": 1644942826000,
       "license": "Apache 2.0",
-      "package_score": 0.73,
+      "package_score": 0.83,
       "num_dependencies": 0,
       "num_vulnerabilities": 0,
       "type": "python",
       "riskVectors": {
-        "license": 1.0,
-        "vulnerability": 0.5,
         "malicious_code": 1.0,
+        "license": 1.0,
         "engineering": 1.0,
-        "author": 1.0
+        "author": 1.0,
+        "vulnerability": 0.5
       },
       "dependencies": {},
       "issues": [
         {
-          "title": "requests@2.6.1 is vulnerable to redirect ARTIFICIAL",
+          "title": "requests@2.6.1 is vulnerable to redirect",
           "description": "### Overview\nThe Requests package before 2.20.0 for Python sends an HTTP Authorization header to an http URI upon receiving a same-hostname https-to-http redirect, which makes it easier for remote attackers to discover credentials by sniffing the network.\n\n### Recommendation\nUpgrade to >= 2.20.0",
           "risk_level": "medium",
           "risk_domain": "vulnerability"
         }
       ]
+    },
+    {
+      "name": "urllib3",
+      "version": "1.24.3",
+      "status": "complete",
+      "last_updated": 1644942827915,
+      "license": "MIT",
+      "package_score": 0.83,
+      "num_dependencies": 5,
+      "num_vulnerabilities": 0,
+      "type": "python",
+      "riskVectors": {
+        "malicious_code": 1.0,
+        "vulnerability": 0.5,
+        "license": 1.0,
+        "author": 1.0,
+        "engineering": 1.0
+      },
+      "dependencies": {
+        "idna": ">=2.0.0",
+        "pyOpenSSL": ">=0.14",
+        "brotlipy": ">=0.6.0",
+        "PySocks": "!=1.5.7,<2.0,>=1.5.6",
+        "cryptography": ">=1.3.4"
+      },
+      "issues": [
+        {
+          "title": "urllib3@1.24.3 is vulnerable to crlf injection",
+          "description": "### Overview\nurllib3 before 1.25.9 allows CRLF injection if the attacker controls the HTTP request method, as demonstrated by inserting CR and LF control characters in the first argument of putrequest(). NOTE: this is similar to CVE-2020-26116.\n\n### Recommendation\nUpgrade to >= 1.25.9",
+          "risk_level": "medium",
+          "risk_domain": "vulnerability"
+        }
+      ]
+    },
+    {
+      "name": "certifi",
+      "version": "2021.10.8",
+      "status": "complete",
+      "last_updated": 1644942826788,
+      "license": "MPL-2.0",
+      "package_score": 1.0,
+      "num_dependencies": 0,
+      "num_vulnerabilities": 0,
+      "type": "python",
+      "riskVectors": {
+        "malicious_code": 1.0,
+        "vulnerability": 1.0,
+        "license": 1.0,
+        "author": 1.0,
+        "engineering": 1.0
+      },
+      "dependencies": {},
+      "issues": []
+    },
+    {
+      "name": "idna",
+      "version": "2.7",
+      "status": "complete",
+      "last_updated": 1644942820496,
+      "license": "BSD-3-Clause",
+      "package_score": 1.0,
+      "num_dependencies": 0,
+      "num_vulnerabilities": 0,
+      "type": "python",
+      "riskVectors": {
+        "license": 1.0,
+        "author": 1.0,
+        "malicious_code": 1.0,
+        "vulnerability": 1.0,
+        "engineering": 1.0
+      },
+      "dependencies": {},
+      "issues": []
+    },
+    {
+      "name": "chardet",
+      "version": "3.0.4",
+      "status": "complete",
+      "last_updated": 1644942826330,
+      "license": "LGPL",
+      "package_score": 1.0,
+      "num_dependencies": 0,
+      "num_vulnerabilities": 0,
+      "type": "python",
+      "riskVectors": {
+        "vulnerability": 1.0,
+        "malicious_code": 1.0,
+        "author": 1.0,
+        "engineering": 1.0,
+        "license": 1.0
+      },
+      "dependencies": {},
+      "issues": []
     }
   ]
 }

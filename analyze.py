@@ -409,7 +409,7 @@ class AnalyzePRForReqs():
         if self.gbl_incomplete == True:
             returncode = 5
             print(f"[DEBUG] {len(self.incomplete_pkgs)} packages were incomplete as of the analysis job")
-            output = INCOMPLETE_COMMENT.replace("TKTK",len(self.incomplete_pkgs))
+            output = INCOMPLETE_COMMENT.replace("TKTK",str(len(self.incomplete_pkgs)))
 
         if self.gbl_failed == False and self.gbl_incomplete == False and self.previous_incomplete == True:
             returncode = 4

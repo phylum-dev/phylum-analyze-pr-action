@@ -213,7 +213,7 @@ class AnalyzePRForReqs():
         #  return pkg_ver
 
     def parse_yarn_lock(self, changes):
-        parse_yarn.parse_yarn_lockfile(changes)
+        parse_yarn.parse_yarn_lock_changes(changes)
 
     def parse_gemfile_lock(self, changes):
         cur = 0

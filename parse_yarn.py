@@ -77,6 +77,23 @@ def parse_yarnv1_lock(changes):
     return pkg_ver
 
 
+def parse_yarn_lock_changes(changes):
+    lockfile_version = 1
+    candidate_line = ""
+    for line in changes:
+        if "version" in line:
+            candidate_line = line
+            break
+    if ":" in candidate_line:
+        lockfile_version = 2
+
+    if lockfile_version == 1:
+        print(f"Parsed yarn v1 lockfile")
+        return parse_yarnv1_lock(changes)
+    else:
+        print(f"Parsed yarn v2 lockfile")
+        return parse_yarnv2_lock(changes)
+
 ''' Take a file name and call the relevant yarn parser'''
 def parse_yarn_lockfile(filename):
     if not Path(filename).is_file():

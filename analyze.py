@@ -6,6 +6,7 @@ import re
 from unidiff import PatchSet
 import pathlib
 from subprocess import run
+import parse_yarn
 
 ENV_KEYS = [
     "GITHUB_SHA", # for get_PR_diff; this is the SHA of the commit for the branch being merged
@@ -192,24 +193,27 @@ class AnalyzePRForReqs():
         return pkg_ver
 
     ''' Parse yarn.lock diff to generate a list of tuples of (package_name, version) '''
-    def parse_yarn_lock(self, changes):
-        cur = 0
-        name_pat        = re.compile(r"[\"]?(@?.*?)(?=@)")
-        version_pat     = re.compile(r".*version \"(.*?)\"")
-        resolved_pat    = re.compile(r".*resolved \"(.*?)\"")
-        integrity_pat   = re.compile(r".*integrity.*")
-        pkg_ver = list()
+    #  def parse_yarn_lock(self, changes):
+        #  cur = 0
+        #  name_pat        = re.compile(r"[\"]?(@?.*?)(?=@)")
+        #  version_pat     = re.compile(r".*version \"(.*?)\"")
+        #  resolved_pat    = re.compile(r".*resolved \"(.*?)\"")
+        #  integrity_pat   = re.compile(r".*integrity.*")
+        #  pkg_ver = list()
 
-        while cur < len(changes)-3:
-            if name_match := re.match(name_pat, changes[cur]):
-                if version_match := re.match(version_pat, changes[cur+1]):
-                    if resolved_match := re.match(resolved_pat, changes[cur+2]):
-                        if integrity_match := re.match(integrity_pat, changes[cur+3]):
-                            name = name_match.groups()[0]
-                            ver = version_match.groups()[0]
-                            pkg_ver.append((name,ver))
-            cur += 1
-        return pkg_ver
+        #  while cur < len(changes)-3:
+            #  if name_match := re.match(name_pat, changes[cur]):
+                #  if version_match := re.match(version_pat, changes[cur+1]):
+                    #  if resolved_match := re.match(resolved_pat, changes[cur+2]):
+                        #  if integrity_match := re.match(integrity_pat, changes[cur+3]):
+                            #  name = name_match.groups()[0]
+                            #  ver = version_match.groups()[0]
+                            #  pkg_ver.append((name,ver))
+            #  cur += 1
+        #  return pkg_ver
+
+    def parse_yarn_lock(self, changes):
+        parse_yarn.parse_yarn_lockfile(changes)
 
     def parse_gemfile_lock(self, changes):
         cur = 0

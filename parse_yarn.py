@@ -3,7 +3,6 @@
 import io
 import re
 import sys
-from IPython import embed
 from pathlib import Path
 
 def search(pkg_ver, search):

@@ -12,7 +12,6 @@ ENV_KEYS = [
     "GITHUB_SHA", # for get_PR_diff; this is the SHA of the commit for the branch being merged
     "GITHUB_BASE_REF", # for get_PR_diff; this is the target branch of the merge
     "GITHUB_WORKSPACE", # for get_PR_diff; this is where the Pull Request code base is
-    "PREVIOUS_INCOMPLETE", # for denoting that this was previously run, and had incomplete packages
 ]
 
 FILE_PATHS = {
@@ -74,9 +73,9 @@ class AnalyzePRForReqs():
             if temp is not None:
                 self.env[key] = temp
             else:
-                print(f"[ERROR] could not get value for os.environ.get({key})")
+                print(f"[ERROR] could not get value for required env variable os.environ.get({key})")
                 # sys.exit(11) #TODO: re-enable
-        if self.env.get("PREVIOUS_INCOMPLETE"):
+        if os.environ.get("PREVIOUS_INCOMPLETE"):
             self.previous_incomplete = True
         return
 

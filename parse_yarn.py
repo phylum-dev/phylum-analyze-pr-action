@@ -61,19 +61,29 @@ def parse_yarnv1_lock(changes):
     integrity_pat   = re.compile(r".*integrity.*")
     pkg_ver = list()
 
-    while cur < len(changes)-3:
-        name_match = re.match(name_pat, changes[cur])
-        if version_match := re.match(version_pat, changes[cur+1]):
-            if resolved_match := re.match(resolved_pat, changes[cur+2]):
-                if integrity_match := re.match(integrity_pat, changes[cur+3]):
-                    if name_match:
-                        name = name_match.groups()[0]
-                    else:
-                        #print(f"No name - need to parse {resolved_match.groups()[0]}")
-                        name = parse_yarnpkg(resolved_match.groups()[0])
+    # the parser breaks if the changeset only has 1 package upgraded from one version to another
+    if len(changes) < 4: #only 1 package was upgraded in the changeset that will trigger this
+        if version_match := re.match(version_pat, changes[cur]):
+            if resolved_match := re.match(resolved_pat, changes[cur+1]):
+                if integrity_match := re.match(integrity_pat, changes[cur+2]):
+                    name = parse_yarnpkg(resolved_match.groups()[0])
                     ver = version_match.groups()[0]
                     pkg_ver.append((name,ver))
-        cur += 1
+
+    else:
+        while cur < len(changes)-3:
+            name_match = re.match(name_pat, changes[cur])
+            if version_match := re.match(version_pat, changes[cur+1]):
+                if resolved_match := re.match(resolved_pat, changes[cur+2]):
+                    if integrity_match := re.match(integrity_pat, changes[cur+3]):
+                        if name_match:
+                            name = name_match.groups()[0]
+                        else:
+                            #print(f"No name - need to parse {resolved_match.groups()[0]}")
+                            name = parse_yarnpkg(resolved_match.groups()[0])
+                        ver = version_match.groups()[0]
+                        pkg_ver.append((name,ver))
+            cur += 1
     return pkg_ver
 
 

@@ -189,27 +189,11 @@ class AnalyzePRForReqs():
                     ver = version_match.groups()[0]
                     pkg_ver.append((name,ver))
             cur +=1
+
+        print(f"[DEBUG]: pkg_ver length: {len(pkg_ver)}")
         return pkg_ver
 
     ''' Parse yarn.lock diff to generate a list of tuples of (package_name, version) '''
-    #  def parse_yarn_lock(self, changes):
-        #  cur = 0
-        #  name_pat        = re.compile(r"[\"]?(@?.*?)(?=@)")
-        #  version_pat     = re.compile(r".*version \"(.*?)\"")
-        #  resolved_pat    = re.compile(r".*resolved \"(.*?)\"")
-        #  integrity_pat   = re.compile(r".*integrity.*")
-        #  pkg_ver = list()
-
-        #  while cur < len(changes)-3:
-            #  if name_match := re.match(name_pat, changes[cur]):
-                #  if version_match := re.match(version_pat, changes[cur+1]):
-                    #  if resolved_match := re.match(resolved_pat, changes[cur+2]):
-                        #  if integrity_match := re.match(integrity_pat, changes[cur+3]):
-                            #  name = name_match.groups()[0]
-                            #  ver = version_match.groups()[0]
-                            #  pkg_ver.append((name,ver))
-            #  cur += 1
-        #  return pkg_ver
 
     def parse_yarn_lock(self, changes):
         pkg_ver = parse_yarn.parse_yarn_lock_changes(changes)
@@ -227,6 +211,8 @@ class AnalyzePRForReqs():
                 ver = name_ver_match.groups()[1]
                 pkg_ver.append((name,ver))
             cur += 1
+
+        print(f"[DEBUG]: pkg_ver length: {len(pkg_ver)}")
         return pkg_ver
 
     def parse_requirements_txt(self, changes):
@@ -240,6 +226,8 @@ class AnalyzePRForReqs():
                 ver = name_ver_match.groups()[1]
                 pkg_ver.append((name,ver))
             cur += 1
+
+        print(f"[DEBUG]: pkg_ver length: {len(pkg_ver)}")
         return pkg_ver
 
 
@@ -346,17 +334,10 @@ class AnalyzePRForReqs():
         else:
             return None
 
-    #TODO: generalize this
     def build_issues_list(self, package_json, issue_flags: list):
         issues = list()
         pkg_issues = package_json.get("issues")
-        # pkg_vulns = package_json.get("vulnerabilities")
 
-        #  if 'vul' in issue_flags:
-            #  for vuln in pkg_vulns:
-                #  risk_level = vuln.get("risk_level")
-                #  title = vuln.get("title")
-                #  issues.append(('VUL', risk_level,title))
 
         for flag in issue_flags:
             for pkg_issue in pkg_issues:
@@ -389,7 +370,6 @@ class AnalyzePRForReqs():
         pr_type = self.determine_pr_type(diff_data)
         changes = self.get_diff_hunks(diff_data, pr_type)
         pkg_ver = self.generate_pkgver(changes, pr_type)
-        # phylum_json = self.read_phylum_analysis('/home/runner/phylum_analysis.json')
         phylum_json = self.read_phylum_analysis(FILE_PATHS.get("phylum_analysis"))
         risk_data = self.parse_risk_data(phylum_json, pkg_ver)
         project_url = self.get_project_url(phylum_json)
@@ -421,8 +401,6 @@ class AnalyzePRForReqs():
             print(f"[DEBUG] failed=False incomplete=False previous_incomplete=True")
             output = COMPLETE_SUCCESS_COMMENT
 
-
-        # with open('/home/runner/returncode.txt','w') as resultout:
         with open(FILE_PATHS.get("returncode"),'w') as resultout:
             resultout.write(str(returncode))
             print(f"[DEBUG] returncode: wrote {str(returncode)}")

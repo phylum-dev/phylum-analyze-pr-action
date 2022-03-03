@@ -122,8 +122,8 @@ runs:
         popd
 
 
-    # - name: tmate
-      # uses: mxschmitt/action-tmate@v3
+    - name: tmate
+      uses: mxschmitt/action-tmate@v3
 
     - name: invoke test matrix
       shell: bash

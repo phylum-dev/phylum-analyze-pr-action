@@ -212,7 +212,9 @@ class AnalyzePRForReqs():
         #  return pkg_ver
 
     def parse_yarn_lock(self, changes):
-        return parse_yarn.parse_yarn_lock_changes(changes)
+        pkg_ver = parse_yarn.parse_yarn_lock_changes(changes)
+        print(f"[DEBUG]: pkg_ver length: {len(pkg_ver)}")
+        return pkg_ver
 
     def parse_gemfile_lock(self, changes):
         cur = 0

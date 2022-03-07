@@ -31,7 +31,7 @@ FILE_PATHS = {
 '''
 
 # Headers for distinct comment types
-DETAILS_DROPDOWN = "<details>\n<summary>Background</summary>\n<br />\nThis repository uses a GitHub Action to automatically analyze the risk of new dependencies added to requirements.txt via Pull Request. An administrator of this repository has set score requirements for Phylum's five risk domains.<br /><br />\nIf you see this comment, one or more dependencies added to the requirements.txt file in this Pull Request have failed Phylum's risk analysis.\n</details>\n\n"
+DETAILS_DROPDOWN = "<details>\n<summary>Background</summary>\n<br />\nThis repository uses a GitHub Action to automatically analyze the risk of new dependencies added to requirements.txt via Pull Request. An administrator of this repository has set score requirements for Phylum's five risk domains.<br /><br />\nIf you see this comment, one or more dependencies added to the package manager lockfile in this Pull Request have failed Phylum's risk analysis.\n</details>\n\n"
 
 INCOMPLETE_COMMENT = "## Phylum OSS Supply Chain Risk Analysis - INCOMPLETE\n\n"
 INCOMPLETE_COMMENT += "This pull request contains TKTK package versions Phylum has not yet processed, preventing a complete risk analysis. Phylum is processing these packages currently and should complete within 30 minutes. Please wait for at least 30 minutes, then re-run the GitHub Check pertaining to `phylum-analyze-pr-action`.\n\n"

@@ -65,7 +65,7 @@ New in `v1.4`, `phylum-analyze-pr-action` will:
 1. Detect the case of incomplete packages
 2. Return an exit code of 0 (a "passing" mark in GitHub Action parlance). This is to avoid failing a check in the PR with incomplete information.
 3. Add a comment to the PR indicating that there were incomplete packages. The comment will advise users to wait 30m and re-run the check on the Pull Request. This will give Phylum sufficient time to download, process and analyze the incomplete packages.
-4. When the check is ran a second time, another comment will be added to the Pull Request noting the result of the risk analysis operation. 
+4. When the check is run a second time, another comment will be added to the Pull Request noting the result of the risk analysis operation. 
 
 ### Example comment
 ![image](https://user-images.githubusercontent.com/132468/140830714-24acc278-0102-4613-b006-6032a62b6896.png)

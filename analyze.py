@@ -74,7 +74,7 @@ class AnalyzePRForReqs():
                 self.env[key] = temp
             else:
                 print(f"[ERROR] could not get value for required env variable os.environ.get({key})")
-                # sys.exit(11) #TODO: re-enable
+                sys.exit(11)
         if os.environ.get("PREVIOUS_INCOMPLETE"):
             self.previous_incomplete = True
         return

@@ -10,9 +10,10 @@ This action enables users to configure thresholds for each of Phylum's five risk
 - uses [peter-evans/create-or-update-comment](https://github.com/marketplace/actions/create-or-update-comment) to add comments to PRs
 
 ## Getting Started
-Create a workflow in a repository that uses the following workflow definition. 
+1. Create a workflow in a repository that uses the workflow definition listed below as an example. 
+2. Be sure to include the base branches you use for development, the defaults are set to `master` and `main`. 
+3. Define risk domain thresholds using `vul_threshold`, `mal_threshold`, etc to define a score requirement. A Phylum project score requirement of 60 is defined as `0.6`, for example. 
 
-Be sure to include the base branches you use for development, the defaults are set to `master` and `main`. 
 ```yaml
 on:
   pull_request:

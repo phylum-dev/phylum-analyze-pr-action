@@ -10,6 +10,9 @@ This action enables users to configure thresholds for each of Phylum's five risk
 - uses [peter-evans/create-or-update-comment](https://github.com/marketplace/actions/create-or-update-comment) to add comments to PRs
 
 ## Getting Started
+Create a workflow in a repository that uses the following workflow definition. 
+
+Be sure to include the base branches you use for development, the defaults are set to `master` and `main`. 
 ```yaml
 on:
   pull_request:
@@ -34,16 +37,16 @@ jobs:
           phylum_token: ${{ secrets.PHYLUM_TOKEN }}
 ```
 
-### Supported lockfiles:
+### Supported lockfiles
 - requirements.txt (Python PyPI)
 - package-lock.json (JavaScript/TypeScript NPM)
 - yarn.lock (JavaScript/TypeScript NPM)
 - Gemfile.lock (Ruby Rubygems/Bundler)
 
-### Requirements:
+### Requirements
 - active Phylum account ([Register here](https://app.phylum.io/auth/registration))
-- repository secret defined: PHYLUM_TOKEN (extracted from Phylum CLI configuration file "offline_access")
-  1. Ensure you've updated the Phylum CLI on a local installation to version `1.2.0`
+- GitHub repository secret defined: PHYLUM_TOKEN (extracted from Phylum CLI configuration file "offline_access")
+  1. Ensure you've updated the Phylum CLI on a local installation to a version >= `1.2.0`
   2. Successfully authenticate using Phylum CLI. This will ensure the token is populated in the phylum config file `~/.phylum/settings.yaml` in stanza `offline_access`
   3. Copy the token value in the `offline_access` stanza
   4. Create a new GitHub secret in the desired repository. This can be done through the GitHub web UI or using the gh command line tool: `gh secret set PHYLUM_TOKEN -b <token_value>`
@@ -51,8 +54,17 @@ jobs:
 - concrete package versions (only applicable for requirements.txt)
 - existing Phylum project for repository (`.phylum_project` must be present)
 
-### Known Issues:
-1. Incomplete packages: if Phylum hasn't yet analyzed a package requested by this action, the action will fail with an exit code of 5. This is momentarily preferable than waiting.
+### Known Issues
+~~1. Incomplete packages: if Phylum hasn't yet analyzed a package requested by this action, the action will fail with an exit code of 5. This is momentarily preferable than waiting.~~
+
+### Incomplete Packages
+Sometimes, users will request risk analysis information for open-source packages Phylum has not yet processed. When this occurs, Phylum cannot reasonably provide risk scoring information until those packages have been processed. 
+
+New in `v1.4`, `phylum-analyze-pr-action` will:
+1. Detect the case of incomplete packages
+2. Return an exit code of 0 (a "passing" mark in GitHub Action parlance). This is to avoid failing a check in the PR with incomplete information.
+3. Add a comment to the PR indicating that there were incomplete packages. The comment will advise users to wait 30m and re-run the check on the Pull Request. This will give Phylum sufficient time to download, process and analyze the incomplete packages.
+4. When the check is ran a second time, another comment will be added to the Pull Request noting the result of the risk analysis operation. 
 
 ### Example comment
 ![image](https://user-images.githubusercontent.com/132468/140830714-24acc278-0102-4613-b006-6032a62b6896.png)

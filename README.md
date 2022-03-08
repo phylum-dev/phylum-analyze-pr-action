@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: analyze-pr-test
-        uses: phylum-dev/phylum-analyze-pr-action@v1.3
+        uses: phylum-dev/phylum-analyze-pr-action@v1.4
         with:
           vul_threshold: 0.6
           mal_threshold: 0.6

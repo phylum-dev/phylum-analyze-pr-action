@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
+import hashlib
 import os
+import shutil
 import sys
 from pathlib import Path
-import shutil
-import hashlib
 
 ENV_KEYS = [
     "GITHUB_RUN_ATTEMPT",
@@ -17,17 +17,20 @@ FILES = {
     "FAIL_FILE": Path(GHAP + "/testing/fail_phylum.json").resolve(),
     "INCOMPLETE_FILE": Path(GHAP + "/testing/incomplete_phylum.json").resolve(),
     "COMPLETE_FAIL_FILE": Path(GHAP + "/testing/complete_fail_phylum.json").resolve(),
-    "COMPLETE_SUCCESS_FILE": Path(GHAP + "/testing/complete_success_phylum.json").resolve(),
+    "COMPLETE_SUCCESS_FILE": Path(
+        GHAP + "/testing/complete_success_phylum.json"
+    ).resolve(),
     "SUCCESS_FILE": Path(GHAP + "/testing/success_phylum.json").resolve(),
 }
 
-'''
+"""
 0 = FAIL
 1 = INCOMPLETE
 2 = COMPLETE_FAIL
 3 = COMPLETE_SUCCESS
 4 = SUCCESS
-'''
+"""
+
 
 class TestMatrix:
     def __init__(self):
@@ -40,7 +43,7 @@ class TestMatrix:
             if temp is not None:
                 self.env[key] = temp
 
-    def swap_phylum_file(self,filename):
+    def swap_phylum_file(self, filename):
         file = FILES.get(filename)
         home = Path.home()
         dest = home.joinpath("phylum_analysis.json")
@@ -49,7 +52,6 @@ class TestMatrix:
 
         md5 = hashlib.md5(open(dest, "rb").read()).hexdigest()
         print(f"MD5 of target: {md5}")
-
 
     def run(self):
         state = int(self.env.get("GITHUB_RUN_ATTEMPT")) % 5

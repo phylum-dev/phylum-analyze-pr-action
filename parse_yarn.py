@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import io
 import re
 import sys
 from pathlib import Path
@@ -37,14 +36,12 @@ def parse_yarnv2_lock(changes):
     name_pat = re.compile(r"[\"]?(@?.*?)(?=@).*:")
     version_pat = re.compile(r".*version: (.*)")
     resolved_pat = re.compile(r".*resolution: \"(.*?)\"")
-    integrity_pat = re.compile(r".*checksum.*")
     pkg_ver = list()
 
     while cur < len(changes) - 3:
         name_match = re.match(name_pat, changes[cur])
         if version_match := re.match(version_pat, changes[cur + 1]):
             if resolved_match := re.match(resolved_pat, changes[cur + 2]):
-                # if integrity_match := re.match(integrity_pat, changes[cur+3]):
                 if name_match:
                     name = name_match.groups()[0]
                 else:
@@ -103,17 +100,15 @@ def parse_yarn_lock_changes(changes):
         lockfile_version = 2
 
     if lockfile_version == 1:
-        print(f"Parsed yarn v1 lockfile")
+        print("Parsed yarn v1 lockfile")
         return parse_yarnv1_lock(changes)
     else:
-        print(f"Parsed yarn v2 lockfile")
+        print("Parsed yarn v2 lockfile")
         return parse_yarnv2_lock(changes)
 
 
-""" Take a file name and call the relevant yarn parser"""
-
-
 def parse_yarn_lockfile(filename):
+    """Take a file name and call the relevant yarn parser."""
     if not Path(filename).is_file():
         print("[ERROR] filename is not a file")
         sys.exit(1)
@@ -130,10 +125,10 @@ def parse_yarn_lockfile(filename):
             lockfile_version = 2
 
     if lockfile_version == 1:
-        print(f"Parsed yarn v1 lockfile")
+        print("Parsed yarn v1 lockfile")
         return parse_yarnv1_lock(changes)
     else:
-        print(f"Parsed yarn v2 lockfile")
+        print("Parsed yarn v2 lockfile")
         return parse_yarnv2_lock(changes)
 
 

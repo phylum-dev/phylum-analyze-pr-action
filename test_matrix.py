@@ -1,9 +1,17 @@
 #!/usr/bin/env python
+"""Test matrix for validating various phylum analysis output results.
+
+Return Codes:
+0 = FAIL
+1 = INCOMPLETE
+2 = COMPLETE_FAIL
+3 = COMPLETE_SUCCESS
+4 = SUCCESS
+"""
 
 import hashlib
 import os
 import shutil
-import sys
 from pathlib import Path
 
 ENV_KEYS = [
@@ -22,14 +30,6 @@ FILES = {
     ).resolve(),
     "SUCCESS_FILE": Path(GHAP + "/testing/success_phylum.json").resolve(),
 }
-
-"""
-0 = FAIL
-1 = INCOMPLETE
-2 = COMPLETE_FAIL
-3 = COMPLETE_SUCCESS
-4 = SUCCESS
-"""
 
 
 class TestMatrix:

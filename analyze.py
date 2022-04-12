@@ -81,8 +81,7 @@ class AnalyzePRForReqs:
             self.previous_incomplete = True
         return
 
-    def new_get_PR_diff(self):
-        pr_commit_sha = self.env.get("GITHUB_SHA")
+    def new_get_pr_diff(self):
         target_branch = self.env.get("GITHUB_BASE_REF")
         diff_target = f"origin/{target_branch}"
 
@@ -92,7 +91,7 @@ class AnalyzePRForReqs:
 
         git_fetch_res = run("git fetch origin".split(" "))
         if git_fetch_res.returncode != 0:
-            print(f"[ERROR] failed to git fetch origin")
+            print("[ERROR] failed to git fetch origin")
             sys.exit(11)
 
         cmd = [
@@ -102,75 +101,70 @@ class AnalyzePRForReqs:
         ]
         result = run(cmd, capture_output=True)
         if result.returncode != 0:
-            print(f"[ERROR] failed to git diff")
+            print("[ERROR] failed to git diff")
             sys.exit(11)
 
         os.chdir(prev)
         return result.stdout
 
-    """ Determine which changes are present in the diff.
-        If more than one package manifest file has been changed, fail as we can't be sure which Phylum project to analyze against """
-
     def determine_pr_type(self, diff_data):
-        patches = PatchSet(diff_data.decode("utf-8"))
-        """
-        Types = [
-            requirements.txt,
-            yarn.lock,
-            package-lock.json,
-            poetry.lock, #?
-        ]
-        """
-        pr_type = None
-        lang = None
-        conflict = False
+        """Determine which changes are present in the diff.
 
-        changes = list()
+        If more than one package manifest file has been changed, fail as we can't be sure which Phylum project to
+        analyze against. Supported package dependency / lock files include:
+
+        * Python
+          * requirements.txt
+          * poetry.lock
+        * Javascript
+          * yarn.lock
+          * package-lock.json
+        * Ruby
+          * Gemfile.lock
+        """
+        patches = PatchSet(diff_data.decode("utf-8"))
+        pr_type = None
+
         for patchfile in patches:
             # TODO: add poetry.lock
             if "requirements.txt" in patchfile.path:
                 if not pr_type:
                     pr_type = "requirements.txt"
-                    lang = "python"
                 else:
                     if pr_type != "requirements.txt":
                         print(
-                            f"[ERROR] PR contains changes from mulitple packaging systems - cannot determine changeset"
+                            "[ERROR] PR contains changes from mulitple packaging systems - cannot determine changeset"
                         )
             if "yarn.lock" in patchfile.path:
                 if not pr_type:
                     pr_type = "yarn.lock"
-                    lang = "javascript"
                 else:
                     if pr_type != "yarn.lock":
                         print(
-                            f"[ERROR] PR contains changes from mulitple packaging systems - cannot determine changeset"
+                            "[ERROR] PR contains changes from mulitple packaging systems - cannot determine changeset"
                         )
             if "package-lock.json" in patchfile.path:
                 if not pr_type:
                     pr_type = "package-lock.json"
-                    lang = "javascript"
                 else:
                     if pr_type != "package-lock.json":
                         print(
-                            f"[ERROR] PR contains changes from mulitple packaging systems - cannot determine changeset"
+                            "[ERROR] PR contains changes from mulitple packaging systems - cannot determine changeset"
                         )
             if "Gemfile.lock" in patchfile.path:
                 if not pr_type:
                     pr_type = "Gemfile.lock"
-                    lang = "ruby"
                 else:
                     if pr_type != "Gemfile.lock":
                         print(
-                            f"[ERROR] PR contains changes from mulitple packaging systems - cannot determine changeset"
+                            "[ERROR] PR contains changes from mulitple packaging systems - cannot determine changeset"
                         )
 
         print(f"[DEBUG] pr_type: {pr_type}")
         return pr_type
 
-    """ Build a list of changes from diff hunks based on the PR_TYPE """
-
     def get_diff_hunks(self, diff_data, pr_type):
+        """Build a list of changes from diff hunks based on the PR_TYPE."""
         patches = PatchSet(diff_data.decode("utf-8"))
 
         changes = list()
@@ -183,9 +177,8 @@ class AnalyzePRForReqs:
         print(f"[DEBUG] get_reqs_hunks: found {len(changes)} changes for {pr_type}")
         return changes
 
-    """ Parse package-lock.json diff to generate a list of tuples of (package_name, version) """
-
     def parse_package_lock(self, changes):
+        """Parse package-lock.json diff to generate a list of tuples of (package_name, version)."""
         cur = 0
         name_pat = re.compile(r".*\"(.*?)\": \{")
         version_pat = re.compile(r".*\"version\": \"(.*?)\"")
@@ -204,9 +197,8 @@ class AnalyzePRForReqs:
         print(f"[DEBUG]: pkg_ver length: {len(pkg_ver)}")
         return pkg_ver
 
-    """ Parse yarn.lock diff to generate a list of tuples of (package_name, version) """
-
     def parse_yarn_lock(self, changes):
+        """Parse yarn.lock diff to generate a list of tuples of (package_name, version)."""
         pkg_ver = parse_yarn.parse_yarn_lock_changes(changes)
         print(f"[DEBUG]: pkg_ver length: {len(pkg_ver)}")
         return pkg_ver
@@ -241,9 +233,8 @@ class AnalyzePRForReqs:
         print(f"[DEBUG]: pkg_ver length: {len(pkg_ver)}")
         return pkg_ver
 
-    """ Parse requirements.txt to generate a list of tuples of (package_name, version) """
-
     def generate_pkgver(self, changes, pr_type):
+        """Parse requirements.txt to generate a list of tuples of (package_name, version)."""
         if pr_type == "requirements.txt":
             #  pat = re.compile(r"(.*)==(.*)")
             pkg_ver_tup = self.parse_requirements_txt(changes)
@@ -261,23 +252,23 @@ class AnalyzePRForReqs:
         # shouldn't get here
         return pkg_ver_tup
 
-    """ Read phylum_analysis.json file """
-
     def read_phylum_analysis(self, filename):
+        """Read phylum_analysis.json file."""
         if not pathlib.Path(filename).is_file():
             print(f"[ERROR] Cannot find {filename}")
             sys.exit(11)
-        with open(filename, "r") as infile:
+        with open(filename, "r", encoding="utf-8") as infile:
             data = infile.read()
             phylum_analysis_json = json.loads(data)
         print(f"[DEBUG] phylum_analysis: read {len(data)} bytes")
         return phylum_analysis_json
 
-    """ Parse risk packages in phylum_analysis.json
-        Ensure packages are in "complete" state; If not, fail
-        Call check_risk_scores on individual package data """
-
     def parse_risk_data(self, phylum_json, pkg_ver):
+        """Parse risk packages in phylum_analysis.json file.
+
+        Ensure packages are in "complete" state; If not, fail
+        Call check_risk_scores on individual package data
+        """
         phylum_pkgs = phylum_json.get("packages")
         risk_scores = list()
         for pkg, ver in pkg_ver:
@@ -291,18 +282,18 @@ class AnalyzePRForReqs:
 
         return risk_scores
 
-    """ Check risk scores of a package against user-provided thresholds
-        If a package has a risk score below the threshold, set the fail bit and
-            Generate the markdown output for pr_comment.txt """
-
     def check_risk_scores(self, package_json):
+        """Check risk scores of a package against user-provided thresholds.
+
+        If a package has a risk score below the threshold, set the fail bit and
+        Generate the markdown output for pr_comment.txt
+        """
         riskvectors = package_json.get("riskVectors")
         failed_flag = 0
-        vuln_flag = 0
         issue_flags = list()
         fail_string = f"### Package: `{package_json.get('name')}@{package_json.get('version')}` failed.\n"
-        fail_string += f"|Risk Domain|Identified Score|Requirement|\n"
-        fail_string += f"|-----------|----------------|-----------|\n"
+        fail_string += "|Risk Domain|Identified Score|Requirement|\n"
+        fail_string += "|-----------|----------------|-----------|\n"
 
         pkg_vul = riskvectors.get("vulnerability")
         pkg_mal = riskvectors.get("malicious_code")
@@ -311,7 +302,6 @@ class AnalyzePRForReqs:
         pkg_aut = riskvectors.get("author")
         if pkg_vul <= self.vul:
             failed_flag = 1
-            vuln_flag = 1
             issue_flags.append("vul")
             fail_string += f"|Software Vulnerability|{pkg_vul*100}|{self.vul*100}|\n"
         if pkg_mal <= self.mal:
@@ -333,8 +323,8 @@ class AnalyzePRForReqs:
 
         fail_string += "\n"
         fail_string += "#### Issues Summary\n"
-        fail_string += f"|Risk Domain|Risk Level|Title|\n"
-        fail_string += f"|-----------|----------|-----|\n"
+        fail_string += "|Risk Domain|Risk Level|Title|\n"
+        fail_string += "|-----------|----------|-----|\n"
 
         issue_list = self.build_issues_list(package_json, issue_flags)
         for rd, rl, title in issue_list:
@@ -367,17 +357,17 @@ class AnalyzePRForReqs:
         return url
 
     def run_prtype(self):
-        diff_data = self.new_get_PR_diff()
+        diff_data = self.new_get_pr_diff()
         pr_type = self.determine_pr_type(diff_data)
         if pr_type is None:
             pr_type = "NA"
         # with open('/home/runner/prtype.txt','w') as outfile:
-        with open(FILE_PATHS.get("pr_type"), "w") as outfile:
+        with open(FILE_PATHS.get("pr_type"), "w", encoding="utf-8") as outfile:
             outfile.write(pr_type)
         sys.exit(0)
 
     def run_analyze(self):
-        diff_data = self.new_get_PR_diff()
+        diff_data = self.new_get_pr_diff()
         pr_type = self.determine_pr_type(diff_data)
         changes = self.get_diff_hunks(diff_data, pr_type)
         pkg_ver = self.generate_pkgver(changes, pr_type)
@@ -388,10 +378,10 @@ class AnalyzePRForReqs:
 
         output = ""
         # Write pr_comment.txt only if the analysis failed and all pkgvers are completed(self.gbl_result == 1)
-        if self.gbl_failed == True and self.gbl_incomplete == False:
+        if self.gbl_failed and not self.gbl_incomplete:
             returncode = 1
             # if this is a repeated test of previously incomplete packages, set the comment based on states of failed, not incomplete and previous
-            if self.previous_incomplete == True:
+            if self.previous_incomplete:
                 output = COMPLETE_FAILED_COMMENT
             else:
                 output = FAILED_COMMENT
@@ -402,27 +392,23 @@ class AnalyzePRForReqs:
                     output += line
 
         # If any packages are incomplete, add 5 to the returncode so we know the results are incomplete
-        if self.gbl_incomplete == True:
+        if self.gbl_incomplete:
             returncode = 5
             print(
                 f"[DEBUG] {len(self.incomplete_pkgs)} packages were incomplete as of the analysis job"
             )
             output = INCOMPLETE_COMMENT.replace("TKTK", str(len(self.incomplete_pkgs)))
 
-        if (
-            self.gbl_failed == False
-            and self.gbl_incomplete == False
-            and self.previous_incomplete == True
-        ):
+        if not self.gbl_failed and not self.gbl_incomplete and self.previous_incomplete:
             returncode = 4
-            print(f"[DEBUG] failed=False incomplete=False previous_incomplete=True")
+            print("[DEBUG] failed=False incomplete=False previous_incomplete=True")
             output = COMPLETE_SUCCESS_COMMENT
 
-        with open(FILE_PATHS.get("returncode"), "w") as resultout:
+        with open(FILE_PATHS.get("returncode"), "w", encoding="utf-8") as resultout:
             resultout.write(str(returncode))
             print(f"[DEBUG] returncode: wrote {str(returncode)}")
 
-        with open(FILE_PATHS.get("pr_comment"), "w") as outfile:
+        with open(FILE_PATHS.get("pr_comment"), "w", encoding="utf-8") as outfile:
             outfile.write(output)
             outfile.write(f"\n[View this project in Phylum UI]({project_url})")
             print(f"[DEBUG] pr_comment.txt: wrote {outfile.tell()} bytes")

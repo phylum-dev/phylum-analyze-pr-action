@@ -43,27 +43,27 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - id: phylum-test
-      uses: phylum-dev/install-phylum-latest-action@v1.3
+    - name: Install phylum CLI
+      uses: phylum-dev/install-phylum-latest-action@v1
       with:
         phylum_token: ${{ inputs.phylum_token }}
         phylum_version: ${{ inputs.phylum_version }}
 
-    - name: Check for previous comment
+    - name: Check for INCOMPLETE comment
       uses: peter-evans/find-comment@v1
       id: fc
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body-includes: INCOMPLETE
 
-    - name: Store result of id=fc in environment
+    - name: Record presence of Phylum INCOMPLETE comment
       shell: bash
       if: "contains(steps.fc.outputs.comment-body, 'Phylum')"
       run: |
         echo "storing PREVIOUS_INCOMPLETE"
         echo PREVIOUS_INCOMPLETE=1 >> $GITHUB_ENV
 
-    - name: Check for existing project
+    - name: Check for existing .phylum_project
       shell: bash
       run: |
         result=$(find . -maxdepth 1 -iname ".phylum_project")
@@ -74,21 +74,22 @@ runs:
           exit 11
         fi
 
-    - name: Generate Phylum label
+    - name: Generate PHYLUM_LABEL
       shell: bash
-      run: |
-        echo PHYLUM_LABEL="GHA-PR${{ github.event.number }}-${GITHUB_HEAD_REF}" >> $GITHUB_ENV
+      run: echo PHYLUM_LABEL="GHA-PR${{ github.event.number }}-${GITHUB_HEAD_REF}" >> $GITHUB_ENV
 
-    - uses: actions/setup-python@v2
+    - name: Setup Python
+      uses: actions/setup-python@v3
       with:
         python-version: '3.x'
 
-    - name: install python dependencies
+    - name: Install python dependencies
       shell: bash
       run: |
-        pip install unidiff
+        python -m pip -U pip setuptools
+        python -m pip install unidiff
 
-    - name: run analyze.py pr_type
+    - name: Run analyze.py pr_type
       shell: bash
       run: python $GITHUB_ACTION_PATH/analyze.py "pr_type" $GITHUB_REPOSITORY ${{ github.event.number }}
 
@@ -96,7 +97,8 @@ runs:
       shell: bash
       run: cat ~/prtype.txt
 
-    - id: get-prtype
+    - name: Get PR type
+      id: get-prtype
       shell: bash
       run: |
         ret="$(cat ~/prtype.txt)"
@@ -105,7 +107,8 @@ runs:
         ret="${ret//$'\r'/'%0A'}"
         echo "::set-output name=prtype::$ret"
 
-    - id: should-proceed
+    - name: Bail when no updates to analyze
+      id: should-proceed
       shell: bash
       if: "contains(steps.get-prtype.outputs.prtype, 'NA')"
       run: |
@@ -122,13 +125,12 @@ runs:
         echo "[*] Analyzed ${{ steps.get-prtype.outputs.prtype }} under label ${PHYLUM_LABEL} and wrote results to ~/phylum_analysis.json"
         popd
 
-    - name: invoke test matrix
+    - name: Invoke test matrix
       shell: bash
       if: "contains(inputs.invoke_test_matrix, 'true')"
-      run: |
-        python $GITHUB_ACTION_PATH/test_matrix.py
+      run: python $GITHUB_ACTION_PATH/test_matrix.py
 
-    - name: python script analyze.py
+    - name: Run analyze.py analyze
       shell: bash
       if: "!contains(steps.get-prtype.outputs.prtype, 'NA')"
       run: >
@@ -142,7 +144,8 @@ runs:
         ${{ inputs.lic_threshold }}
         ${{ inputs.aut_threshold }}
 
-    - id: get-returncode
+    - name: Get return code
+      id: get-returncode
       shell: bash
       run: |
         ret="$(cat ~/returncode.txt)"
@@ -152,14 +155,15 @@ runs:
         echo "::set-output name=ret::$ret"
 
     # This will catch SUCCESS cases
-    - name: return 0 for success
+    - name: Return 0 for success
       shell: bash
       if: "contains(steps.get-returncode.outputs.ret, '0')"
       run: |
-        echo 'exiting with 0 for success'
+        echo "exiting with 0 for success"
         exit 0
 
-    - id: get-comment-body
+    - name: Get comment body
+      id: get-comment-body
       # this will have to check for 1 or 5 AND if on the second run
       # if: "contains(steps.get-returncode.outputs.ret, '1')"
       if: "steps.get-returncode.outputs.ret > 0"
@@ -176,13 +180,13 @@ runs:
       # Could check for > 0 ?
       # if: "contains(steps.get-returncode.outputs.ret, '1')"
       if: "steps.get-returncode.outputs.ret > 0"
-      uses: peter-evans/create-or-update-comment@v1
+      uses: peter-evans/create-or-update-comment@v2
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: ${{ steps.get-comment-body.outputs.body }}
 
     # This will catch INCOMPLETE and COMPLETE_SUCCESS
-    - name: handle ret values of 4 or 5
+    - name: Handle return values of 4 or 5
       shell: bash
       if: "steps.get-returncode.outputs.ret >= 4"
       run: |
@@ -190,9 +194,9 @@ runs:
         exit 0
 
     # This will catch FAILURE and COMPLETE_FAILURE
-    - name: return 1 for risk analysis failure
+    - name: Handle risk analysis failures
       shell: bash
       if: "contains(steps.get-returncode.outputs.ret, '1')"
       run: |
-        echo 'exiting with 1 for risk analysis failure'
+        echo "exiting with 1 for risk analysis failure"
         exit 1

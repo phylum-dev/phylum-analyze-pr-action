@@ -87,7 +87,7 @@ runs:
       shell: bash
       run: |
         python -m pip -U pip setuptools
-        python -m pip install unidiff
+        python -m pip install unidiff packaging
 
     - name: Run analyze.py pr_type
       shell: bash

@@ -15,6 +15,7 @@ import re
 import sys
 from subprocess import run
 
+from packaging.utils import parse_sdist_filename, parse_wheel_filename
 from unidiff import PatchSet
 
 import parse_yarn
@@ -135,6 +136,14 @@ class AnalyzePRForReqs:
                         print(
                             "[ERROR] PR contains changes from mulitple packaging systems - cannot determine changeset"
                         )
+            if "poetry.lock" in patchfile.path:
+                if not pr_type:
+                    pr_type = "poetry.lock"
+                else:
+                    if pr_type != "poetry.lock":
+                        print(
+                            "[ERROR] PR contains changes from mulitple packaging systems - cannot determine changeset"
+                        )
             if "yarn.lock" in patchfile.path:
                 if not pr_type:
                     pr_type = "yarn.lock"
@@ -233,24 +242,45 @@ class AnalyzePRForReqs:
         print(f"[DEBUG]: pkg_ver length: {len(pkg_ver)}")
         return pkg_ver
 
-    def generate_pkgver(self, changes, pr_type):
-        """Parse requirements.txt to generate a list of tuples of (package_name, version)."""
-        if pr_type == "requirements.txt":
-            #  pat = re.compile(r"(.*)==(.*)")
-            pkg_ver_tup = self.parse_requirements_txt(changes)
-            return pkg_ver_tup
-        elif pr_type == "yarn.lock":
-            pkg_ver_tup = self.parse_yarn_lock(changes)
-            return pkg_ver_tup
-        elif pr_type == "package-lock.json":
-            pkg_ver_tup = self.parse_package_lock(changes)
-            return pkg_ver_tup
-        elif pr_type == "Gemfile.lock":
-            pkg_ver_tup = self.parse_gemfile_lock(changes)
-            return pkg_ver_tup
+    def parse_poetry_lock(self, changes):
+        """Parse lines added to a poetry.lock file to identify package names and versions."""
+        file_name_pat = re.compile(
+            r"""^       # match beginning of string
+            \s{4}       # start with four spaces
+            {file       # start of the mapping for a file
+            \s=\s       # whitespace separated mapping assignment operator
+            "(.*?)"     # non-greedy capture group for the file name
+            """,
+            re.VERBOSE,
+        )
+        pkg_ver = set()
 
-        # shouldn't get here
-        return pkg_ver_tup
+        for change in changes:
+            if pattern_match := re.match(file_name_pat, change):
+                filename = pattern_match.groups()[0]
+                if filename.endswith(".tar.gz"):
+                    name, ver = parse_sdist_filename(filename)
+                    pkg_ver.add((name, str(ver)))
+                elif filename.endswith(".whl"):
+                    name, ver, *_ = parse_wheel_filename(filename)
+                    pkg_ver.add((name, str(ver)))
+
+        print(f"[DEBUG]: pkg_ver length: {len(pkg_ver)}")
+        return list(pkg_ver)
+
+    def generate_pkgver(self, changes, pr_type):
+        """Parse dependency file to generate a list of tuples of (package_name, version)."""
+        if pr_type == "requirements.txt":
+            return self.parse_requirements_txt(changes)
+        if pr_type == "poetry.lock":
+            return self.parse_poetry_lock(changes)
+        if pr_type == "yarn.lock":
+            return self.parse_yarn_lock(changes)
+        if pr_type == "package-lock.json":
+            return self.parse_package_lock(changes)
+        if pr_type == "Gemfile.lock":
+            return self.parse_gemfile_lock(changes)
+        return None
 
     def read_phylum_analysis(self, filename):
         """Read phylum_analysis.json file."""

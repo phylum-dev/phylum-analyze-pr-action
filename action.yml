@@ -86,7 +86,7 @@ runs:
     - name: Install python dependencies
       shell: bash
       run: |
-        python -m pip -U pip setuptools
+        python -m pip install -U pip setuptools
         python -m pip install unidiff packaging
 
     - name: Determine the PR type

@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+"""Analyze a GitHub PR with Phylum.
+
+States on returncode:
+0 = No comment
+1 = FAILED_COMMENT
+5 = INCOMPLETE_COMMENT then:
+    4 = COMPLETE_SUCCESS_COMMENT
+    1 = COMPLETE_FAILED_COMMENT
+"""
 import json
 import os
 import pathlib
@@ -22,15 +31,6 @@ FILE_PATHS = {
     "returncode": "/home/runner/returncode.txt",
     "pr_comment": "/home/runner/pr_comment.txt",
 }
-
-"""
-    States on returncode
-    0 = No comment
-    1 = FAILED_COMMENT
-    5 = INCOMPLETE_COMMENT then:
-        4 = COMPLETE_SUCCESS_COMMENT
-        1 = COMPLETE_FAILED_COMMENT
-"""
 
 # Headers for distinct comment types
 DETAILS_DROPDOWN = "<details>\n<summary>Background</summary>\n<br />\nThis repository uses a GitHub Action to automatically analyze the risk of new dependencies added via Pull Request. An administrator of this repository has set score requirements for Phylum's five risk domains.<br /><br />\nIf you see this comment, one or more dependencies added to the package manager lockfile in this Pull Request have failed Phylum's risk analysis.\n</details>\n\n"
@@ -266,17 +266,18 @@ class AnalyzePRForReqs:
     def parse_risk_data(self, phylum_json, pkg_ver):
         """Parse risk packages in phylum_analysis.json file.
 
-        Ensure packages are in "complete" state; If not, fail
-        Call check_risk_scores on individual package data
+        Packages that are in a completed analysis state will be included in the risk score report.
+        Packages that have not completed analysis will be included with other incomplete packages
+        and the overall PR will be allowed to pass, but with a note about re-running again later.
         """
         phylum_pkgs = phylum_json.get("packages")
         risk_scores = list()
         for pkg, ver in pkg_ver:
-            for elem in phylum_pkgs:
-                if elem.get("name") == pkg and elem.get("version") == ver:
-                    if elem.get("status") == "complete":
-                        risk_scores.append(self.check_risk_scores(elem))
-                    elif elem.get("status") == "incomplete":
+            for phylum_pkg in phylum_pkgs:
+                if phylum_pkg.get("name") == pkg and phylum_pkg.get("version") == ver:
+                    if phylum_pkg.get("status") == "complete":
+                        risk_scores.append(self.check_risk_scores(phylum_pkg))
+                    elif phylum_pkg.get("status") == "incomplete":
                         self.incomplete_pkgs.append((pkg, ver))
                         self.gbl_incomplete = True
 
@@ -330,7 +331,6 @@ class AnalyzePRForReqs:
         for rd, rl, title in issue_list:
             fail_string += f"|{rd}|{rl}|{title}|\n"
 
-        #  return fail_string if failed_flag else None
         if failed_flag:
             self.gbl_failed = True
             return fail_string
@@ -361,7 +361,6 @@ class AnalyzePRForReqs:
         pr_type = self.determine_pr_type(diff_data)
         if pr_type is None:
             pr_type = "NA"
-        # with open('/home/runner/prtype.txt','w') as outfile:
         with open(FILE_PATHS.get("pr_type"), "w", encoding="utf-8") as outfile:
             outfile.write(pr_type)
         sys.exit(0)
@@ -377,10 +376,11 @@ class AnalyzePRForReqs:
         returncode = 0
 
         output = ""
-        # Write pr_comment.txt only if the analysis failed and all pkgvers are completed(self.gbl_result == 1)
+        # Write pr_comment.txt only if the analysis failed and all pkgvers are completed
         if self.gbl_failed and not self.gbl_incomplete:
             returncode = 1
-            # if this is a repeated test of previously incomplete packages, set the comment based on states of failed, not incomplete and previous
+            # if this is a repeated test of previously incomplete packages,
+            # set the comment based on states of failed, not incomplete and previous
             if self.previous_incomplete:
                 output = COMPLETE_FAILED_COMMENT
             else:

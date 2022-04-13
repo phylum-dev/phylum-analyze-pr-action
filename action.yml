@@ -89,15 +89,15 @@ runs:
         python -m pip -U pip setuptools
         python -m pip install unidiff packaging
 
-    - name: Run analyze.py pr_type
+    - name: Determine the PR type
       shell: bash
       run: python $GITHUB_ACTION_PATH/analyze.py "pr_type" $GITHUB_REPOSITORY ${{ github.event.number }}
 
-    - name: cat prtype
+    - name: Display the PR type
       shell: bash
       run: cat ~/prtype.txt
 
-    - name: Get PR type
+    - name: Make PR type available for future steps
       id: get-prtype
       shell: bash
       run: |
@@ -115,7 +115,7 @@ runs:
         echo 'exiting with 0 since package dependency files were not modified'
         echo '0' > $HOME/returncode.txt
 
-    - name: Analyze project lockfile
+    - name: Analyze project lockfile with phylum CLI
       shell: bash
       if: "!contains(steps.get-prtype.outputs.prtype, 'NA')"
       run: |
@@ -130,7 +130,7 @@ runs:
       if: "contains(inputs.invoke_test_matrix, 'true')"
       run: python $GITHUB_ACTION_PATH/test_matrix.py
 
-    - name: Run analyze.py analyze
+    - name: Compare added dependencies in PR to analysis results
       shell: bash
       if: "!contains(steps.get-prtype.outputs.prtype, 'NA')"
       run: >

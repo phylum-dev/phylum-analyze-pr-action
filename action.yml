@@ -115,11 +115,20 @@ runs:
         echo 'exiting with 0 since package dependency files were not modified'
         echo '0' > $HOME/returncode.txt
 
+    - name: Update system path
+      shell: bash
+      run: |
+        # In version 2.2.0 and older, the binary is installed at "$HOME/.phylum". But newer versions use "$HOME/.local/bin"
+        if [ -f "$HOME/.phylum/phylum" -a -x "$HOME/.phylum/phylum" ]; then
+          echo "$HOME/.phylum" >> $GITHUB_PATH
+        else
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        fi
+
     - name: Analyze project lockfile with phylum CLI
       shell: bash
       if: "!contains(steps.get-prtype.outputs.prtype, 'NA')"
       run: |
-        export PATH="$HOME/.phylum:$PATH"
         pushd $GITHUB_WORKSPACE || exit 11
         phylum analyze -l $PHYLUM_LABEL ${{ steps.get-prtype.outputs.prtype }} --verbose --json > ~/phylum_analysis.json
         echo "[*] Analyzed ${{ steps.get-prtype.outputs.prtype }} under label ${PHYLUM_LABEL} and wrote results to ~/phylum_analysis.json"

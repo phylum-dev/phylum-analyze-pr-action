@@ -373,11 +373,11 @@ class AnalyzePRForReqs:
 
         for flag in issue_flags:
             for pkg_issue in pkg_issues:
-                if flag in pkg_issue.get("risk_domain"):
-                    risk_domain = pkg_issue.get("risk_domain")
-                    risk_level = pkg_issue.get("risk_level")
+                if flag in pkg_issue.get("domain"):
+                    domain = pkg_issue.get("domain")
+                    severity = pkg_issue.get("severity")
                     title = pkg_issue.get("title")
-                    issues.append((risk_domain, risk_level, title))
+                    issues.append((domain, severity, title))
 
         return issues
 

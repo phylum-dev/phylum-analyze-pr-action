@@ -22,7 +22,7 @@ inputs:
   cmd:
     description: The phylum-ci command line to pass to the Docker container's entrypoint
     required: true
-    default: phylum-ci --help
+    default: phylum-ci
 runs:
   using: docker
   image: docker://phylumio/phylum-ci:latest

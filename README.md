@@ -121,7 +121,7 @@ Let's take a deeper dive into each part of the configuration:
 The workflow and job names can be named differently or included in existing workflows/jobs.
 
 ```yaml
-name: Phylum_analyze                        # Name the workflow name what you like
+name: Phylum_analyze                        # Name the workflow what you like
 on: pull_request
 jobs:
   analyze_deps:                             # Name the job what you like
@@ -171,7 +171,7 @@ See the [GitHub documentation][scopes] for more info.
 
 When using a personal access token (PAT) instead, the token should be created with the `repo` scope or
 minimally the with `public_repo` scope if private repositories will not be used with the PAT.
-See th [GitHub documentation][PAT] for more info.
+See the [GitHub documentation][PAT] for more info.
 
 ```yaml
     permissions:                # Ensure least privilege of actions

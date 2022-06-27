@@ -1,85 +1,343 @@
-# phylum-analyze-pr-action
-A GitHub Action to automatically analyze Pull Requests for changes to package manager lockfiles using Phylum.
+# Phylum Analyze PR action
+
+[![GitHub](https://img.shields.io/github/license/phylum-dev/phylum-analyze-pr-action)](https://github.com/phylum-dev/phylum-analyze-pr-action/blob/main/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/phylum-dev/phylum-analyze-pr-action)](https://github.com/phylum-dev/phylum-analyze-pr-action/issues)
+![GitHub last commit](https://img.shields.io/github/last-commit/phylum-dev/phylum-analyze-pr-action)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](./CODE_OF_CONDUCT.md)
+
+A GitHub Action using Phylum to automatically analyze Pull Requests for changes to package manager lockfiles.
+
+## Overview
 
 Phylum provides a complete risk analyis of "open-source packages" (read: untrusted software from random Internet
 strangers). Phylum evolved forward from legacy SCA tools to defend from supply-chain malware, malicious open-source
 authors, and engineering risk, in addtion to software vulnerabilities and license risks. To learn more, please see
 [our website](https://phylum.io)
 
-This action enables users to configure thresholds for each of Phylum's five risk domain scores. If a package risk
-domain score is below the threshold, the action will fail the check on the pull request. When packages fail the risk
-analysis, a comment is created on the PR to summarize the issues.
+Once configured for a repository, this action will provide analysis of project dependencies from a lockfile during a
+Pull Request (PR) and output the results as a comment on the PR.
+The CI job will return an error (i.e., fail the build) if any of the newly added/modified dependencies from the PR fail
+to meet the project risk thresholds for any of the five Phylum risk domains:
 
-## Features
-- configurable risk domain thresholds
-- uses [peter-evans/create-or-update-comment](https://github.com/marketplace/actions/create-or-update-comment)
-  to add comments to PRs
+* Vulnerability (aka `vul`)
+* Malicious Code (aka `mal`)
+* Engineering (aka `eng`)
+* License (aka `lic`)
+* Author (aka `aut`)
+
+See [Phylum Risk Domains documentation](https://docs.phylum.io/docs/phylum-package-score#risk-domains) for more detail.
+
+**NOTE**: It is not enough to have the total project threshold set. Individual risk domain threshold values must be set,
+either in the UI or with `phylum-ci` options, in order to enable analysis results for CI. Otherwise, the risk domain is
+considered disabled and the threshold value used will be zero (0).
+
+There will be no note if no dependencies were added or modified for a given MR.
+If one or more dependencies are still processing (no results available), then the note will make that clear and the CI
+job will only fail if dependencies that have _completed analysis results_ do not meet the specified project risk
+thresholds.
+
+## Prerequisites
+
+The GitHub Actions environment is primarily supported through the use of a Docker image.
+The pre-requisites for using this image are:
+
+* Ability to run a [Docker container action][container]
+  * GitHub-hosted runners must use an Ubuntu runner
+  * Self-hosted runners must use a Linux operating system and have Docker installed
+* Access to the [phylumio/phylum-ci Docker image](https://hub.docker.com/r/phylumio/phylum-ci/tags)
+* A [GitHub token][gh_token] with API access
+  * Can be the default `GITHUB_TOKEN` provided automatically at the start of each workflow run
+    * Needs at least write access for `pull-requests` scope - see [documentation][scopes]
+  * Can be a personal access token (PAT) - see [documentation][PAT]
+    * Needs the `repo` scope or minimally the `public_repo` scope if private repositories are not used
+* A [Phylum token](https://docs.phylum.io/docs/api-keys) with API access
+  * [Contact Phylum](https://phylum.io/contact-us/) or create an account and register to gain access
+    * See also [`phylum auth register`](https://docs.phylum.io/docs/phylum_auth_register) command documentation
+  * Consider using a bot or group account for this token
+* Access to the Phylum API endpoints
+  * That usually means a connection to the internet, optionally via a proxy
+  * Support for on-premises installs are not available at this time
+* A `.phylum_project` file exists at the root of the repository
+  * See [`phylum project`](https://docs.phylum.io/docs/phylum_project) and
+    [`phylum project create`](https://docs.phylum.io/docs/phylum_project_create) command documentation
+
+[container]: https://docs.github.com/en/actions/creating-actions/creating-a-docker-container-action
+[gh_token]: https://docs.github.com/en/actions/security-guides/automatic-token-authentication
+[scopes]: https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps#available-scopes
+[PAT]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+
+## Supported lockfiles
+
+If not explicitly specified, an attempt will be made to automatically detect the lockfile. Some lockfile types
+(e.g., Python/pip `requirements.txt`) are ambiguous in that they can be named differently and may or may not contain
+strict dependencies. In these cases, it is best to specify an explicit lockfile path by using the `phylum-ci --lockfile`
+option. The list of currently supported lockfiles can be found in the
+[Phylum Knowledge Base](https://docs.phylum.io/docs/analyzing-dependencies).
 
 ## Getting Started
-1. Create a workflow in a repository that uses the workflow definition listed below as an example
-2. Be sure to include the base/default branches used for development, where the defaults are set to `master` and `main`
-3. Define risk domain thresholds using `vul_threshold`, `mal_threshold`, etc. to define a score requirement
-   1. For example, a Phylum project score requirement of 60 is defined as `0.6`
-4. Additional inputs can be used - see [action.yml](action.yml) for full list
+
+Phylum analysis of dependencies can be added to existing CI workflows or on it's own with this minimal configuration:
 
 ```yaml
-on:
-  pull_request:
-    branches:
-      - master
-      - main
-
+name: Phylum_analyze
+on: pull_request
 jobs:
-  analyze_PR_with_Phylum_job:
+  analyze_deps:
+    name: Analyze dependencies with Phylum
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
-    name: A job to analyze PR with phylum
     steps:
-      - uses: actions/checkout@v3
-      - id: analyze-pr-test
-        uses: phylum-dev/phylum-analyze-pr-action@v1
+      - name: Checkout the repo
+        uses: actions/checkout@v3
         with:
-          vul_threshold: 0.6
-          mal_threshold: 0.6
-          eng_threshold: 0.6
-          lic_threshold: 0.6
-          aut_threshold: 0.6
+          fetch-depth: 0
+      - name: Analyze lockfile
+        uses: phylum-dev/phylum-analyze-pr-action@v2
+        with:
           phylum_token: ${{ secrets.PHYLUM_TOKEN }}
 ```
 
-### Supported lockfiles
-- `requirements.txt` (Python PyPI)
-- `poetry.lock` (Python PyPI)
-- `package-lock.json` (JavaScript/TypeScript NPM)
-- `yarn.lock` (JavaScript/TypeScript NPM)
-- `Gemfile.lock` (Ruby Rubygems/Bundler)
+This configuration contains a single job, with two steps, that will only run on pull request events.
+It does not override any of the `phylum-ci` arguments, which are all either optional or default to secure values.
+Let's take a deeper dive into each part of the configuration:
 
-### Requirements
-- active Phylum account ([Register here](https://app.phylum.io/auth/registration))
-- GitHub repository secret defined: `PHYLUM_TOKEN`
-  1. Ensure you've updated the Phylum CLI on a local installation to a version >= `2.0.1`
-  2. Successfully authenticate using Phylum CLI to ensure the token is populated and correct
-  3. Copy the token value from the output of the `phylum auth token` command
-  4. Create a new GitHub secret named `PHYLUM_TOKEN` in the desired repository, through the GitHub web UI or using the gh command line tool: `gh secret set PHYLUM_TOKEN -b <token_value>`
-- concrete package versions (only applicable for `requirements.txt`)
-- existing Phylum project for repository (`.phylum_project` must be present)
+### Workflow and Job names
 
-### Known Issues
-- [Issue tracker](https://github.com/phylum-dev/phylum-analyze-pr-action/issues)
-- [Open bugs](https://github.com/phylum-dev/phylum-analyze-pr-action/labels/%F0%9F%95%B7%EF%B8%8F%20bug)
+The workflow and job names can be named differently or included in existing workflows/jobs.
 
-### Incomplete Packages
-Sometimes, users will request risk analysis information for open-source packages Phylum has not yet processed.
-When this occurs, Phylum cannot reasonably provide risk scoring information until those packages have been processed.
+```yaml
+name: Phylum_analyze                        # Name the workflow what you like
+on: pull_request
+jobs:
+  analyze_deps:                             # Name the job what you like
+    name: Analyze dependencies with Phylum  # This name is optional (defaults to job name)
+```
 
-Starting with `v1.4.0`, `phylum-analyze-pr-action` will:
-1. Detect the case of incomplete packages
-2. Return an exit code of 0 (a "passing" mark in GitHub Action parlance)
-   1. This is to avoid failing a check in the PR with incomplete information
-3. Add a comment to the PR indicating that there were incomplete packages
-   1. The comment will advise users to wait 30m and re-run the check on the Pull Request
-   2. This will give Phylum sufficient time to download, process and analyze the incomplete packages
-4. When the check is run a second time, another comment will be added to the Pull Request noting the result of the
-   risk analysis operation.
+### Workflow trigger
 
-### Example comment
-![image](https://user-images.githubusercontent.com/132468/140830714-24acc278-0102-4613-b006-6032a62b6896.png)
+The Phylum Analyze PR action expects to be run in the context of a [`pull_request` webhook event][pr_hook].
+This includes both [`pull_request`][pr] and [`pull_request_target`][prt] events.
+
+[pr_hook]: https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#pull_request
+[pr]: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
+[prt]: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request_target
+
+```yaml
+# NOTE: These are examples. Only one definition for `on` is expected.
+
+# Specify the `pull_request` event trigger on one line
+on: pull_request
+
+# Alternative to specify `pull_request` trigger (e.g., when other triggers are present)
+on:
+  pull_request:
+
+# Specify specific branches for the `pull_request` trigger to target
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+```
+
+### Permissions
+
+When using the default `GITHUB_TOKEN` provided automatically at the start of each workflow run, it is good practice to
+ensure the actions used in the workflow are given the least privileges needed to perform their intended function.
+The Phylum Analyze PR actions needs at least write access for the `pull-requests` scope.
+The `actions/checkout` action needs at least read access for the `contents` scope.
+See the [GitHub documentation][scopes] for more info.
+
+```yaml
+    permissions:                # Ensure least privilege of actions
+      contents: read            # For actions/checkout
+      pull-requests: write      # For phylum-dev/phylum-analyze-pr-action
+```
+
+When using a personal access token (PAT) instead, the token should be created with the `repo` scope or
+minimally the with `public_repo` scope if private repositories will not be used with the PAT.
+See the [GitHub documentation][PAT] for more info.
+
+```yaml
+    permissions:                # Ensure least privilege of actions
+      contents: read            # For actions/checkout
+      # The phylum-dev/phylum-analyze-pr-action does not
+      # need the `pull-requests` scope here if using a PAT
+```
+
+### Specifying a Runner
+
+The Phylum Analyze PR action is a [Docker container action][container].
+This requires that [GitHub-hosted runners][runners] use an Ubuntu runner.
+Self-hosted runners must use a Linux operating system and have Docker installed.
+
+[runners]: https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
+
+```yaml
+    runs-on: ubuntu-latest
+```
+
+### Checking out the Repository
+
+`git` is used within the `phylum-ci` package to do things like determine if there was a lockfile change and,
+when specified, report on new dependencies only. Therefore, a clone of the repository is required to ensure that
+the local working copy is always pristine and history is available to pull the requested information.
+
+```yaml
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+        with:
+          # Specifying a depth of 0 ensures all history for all branches.
+          # This input may not be required when `--all-deps` option is used.
+          fetch-depth: 0
+```
+
+### Action Inputs
+
+The action inputs are used to ensure the `phylum-ci` tool is able to perform it's job.
+
+A [Phylum token](https://docs.phylum.io/docs/api-keys) with API access is required to perform analysis on project
+dependencies. [Contact Phylum](https://phylum.io/contact-us/) or create an account and register to gain access.
+See also [`phylum auth register`](https://docs.phylum.io/docs/phylum_auth_register) command documentation and consider
+using a bot or group account for this token.
+
+A [GitHub token][gh_token] with API access is required to use the API (e.g., to post comments).
+This can be the default `GITHUB_TOKEN` provided automatically at the start of each workflow run but it will need at
+least write access for the `pull-requests` scope (see [documentation][scopes]).
+Alternatively, it can be a [personal access token (PAT)][PAT] with the `repo` scope or minimally the `public_repo`
+scope, if private repositories are not used.
+
+The values for the `phylum_token` and `github_token` action inputs can come from repository, environment, or
+organizational [encrypted secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets).
+Since they are sensitive, **care should be taken to protect them appropriately**.
+
+The `cmd` arguments to the Docker image are the way to exert control over the execution of the Phylum analysis. The
+`phylum-ci` script entry point is expected to be called. It has a number of arguments that are all optional and
+defaulted to secure values. To view the arguments, their description, and default values, run the script with `--help`
+output as specified in the [Usage section of the `phylum-dev/phylum-ci` repository's README][usage] or view the
+[source code][src] directly.
+
+[usage]: https://github.com/phylum-dev/phylum-ci#usage
+[src]: https://github.com/phylum-dev/phylum-ci/blob/main/src/phylum/ci/cli.py
+
+```yaml
+    steps:
+      - name: Analyze lockfile
+        uses: phylum-dev/phylum-analyze-pr-action@v2
+        with:
+          # Contact Phylum (https://phylum.io/contact-us/) or create an account and register to gain access.
+          # See also `phylum auth register` (https://docs.phylum.io/docs/phylum_auth_register) command docs.
+          # Consider using a bot or group account for this token.
+          phylum_token: ${{ secrets.PHYLUM_TOKEN }}
+
+          # NOTE: These are examples. Only one `github_token` entry line is expected.
+          #
+          # Use the default `GITHUB_TOKEN` provided automatically at the start of each workflow run.
+          # This entry does not have to be specified since it is the default.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Use a personal access token (PAT)
+          github_token: ${{ secrets.GITHUB_PAT }}
+
+          # NOTE: These are examples. Only one `cmd` entry line is expected.
+          #
+          # Use the defaults for all the arguments.
+          # The default behavior is to only analyze newly added dependencies against
+          # the risk domain threshold levels set at the Phylum project level.
+          # This entry does not have to be specified since it is the default.
+          cmd: phylum-ci
+          # Consider all dependencies in analysis results instead of just the newly added ones.
+          # The default is to only analyze newly added dependencies, which can be useful for
+          # existing code bases that may not meet established project risk thresholds yet,
+          # but don't want to make things worse. Specifying `--all-deps` can be useful for
+          # casting the widest net for strict adherence to Quality Assurance (QA) standards.
+          cmd: phylum-ci --all-deps
+          # Some lockfile types (e.g., Python/pip `requirements.txt`) are ambiguous in that
+          # they can be named differently and may or may not contain strict dependencies.
+          # In these cases, it is best to specify an explicit lockfile path.
+          cmd: phylum-ci --lockfile requirements-prod.txt
+          # Thresholds for the five risk domains may be set at the Phylum project level.
+          # They can be set differently for CI environments to "fail the build."
+          # NOTE: The shortened form is used here for brevity, but the long form might be more
+          #       descriptive for future readers. For instance `--vul-threshold` instead of `-u`.
+          cmd: phylum-ci -u 60 -m 60 -e 70 -c 90 -o 80
+          # Install a specific version of the Phylum CLI.
+          cmd: phylum-ci --phylum-release 3.5.0 --force-install
+          # Mix and match for your specific use case.
+          cmd: phylum-ci -u 60 -m 60 -e 70 -c 90 -o 80 --lockfile requirements-prod.txt --all-deps
+```
+
+## Continue on Error
+
+The above examples will fail the workflow when issues are found.
+If the desire is to ensure the workflow continues, even if Phylum finds issues with dependencies, then
+`continue-on-error` can be used at the [step level][1] and/or the [job level][2].
+
+[1]: https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepscontinue-on-error
+[2]: https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idcontinue-on-error
+
+This feature pairs nicely with the `--all-deps` and `--force-analysis` flags offered by the `phylum-ci` image.
+This can be useful for existing code bases that may not meet established project risk thresholds yet, but still want to
+know the full and current state of their dependency health.
+
+```yaml
+name: Example workflow using Phylum with continue on error
+on: pull_request
+jobs:
+  analyze_deps:
+    name: Analyze dependencies in a pull request with Phylum
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    continue-on-error: true     # This is the job level
+    steps:
+      - name: Checkout the repo with full history
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0        # Not really needed for `--all-deps`
+      - name: Analyze lockfile
+        continue-on-error: true # This is the step level
+        uses: phylum-dev/phylum-analyze-pr-action@v2
+        with:
+          phylum_token: ${{ secrets.PHYLUM_TOKEN }}
+          cmd: phylum-ci --all-deps
+```
+
+## Example Comments
+
+---
+
+Phylum OSS Supply Chain Risk Analysis - FAILED
+
+![image](https://user-images.githubusercontent.com/18729796/175793030-1294695d-6e72-405a-8916-444e476ab7ee.png)
+
+---
+
+Phylum OSS Supply Chain Risk Analysis - SUCCESS
+
+![image](https://user-images.githubusercontent.com/18729796/175792822-860e708e-7b8f-4ae3-b43b-28912c6ec7d2.png)
+
+---
+
+## License
+
+MIT - with complete text available in the [LICENSE](./LICENSE) file.
+
+## Contributing
+
+Suggestions and help are welcome. Feel free to open an issue or otherwise contribute.
+More information is available on the [contributing documentation](./CONTRIBUTING.md) page.
+
+## Code of Conduct
+
+Everyone participating in the `phylum-analyze-pr-action` project, and in particular in the issue tracker and pull
+requests, is expected to treat other people with respect and more generally to follow the guidelines articulated in the
+[Code of Conduct](./CODE_OF_CONDUCT.md).
+
+## Security Disclosures
+
+Found a security issue in this repository? See the [security policy](./SECURITY.md)
+for details on coordinated disclosure.

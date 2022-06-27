@@ -68,24 +68,11 @@ The pre-requisites for using this image are:
 
 ## Supported lockfiles
 
-These are the currently supported lockfiles.
-They are grouped by language and also show the name of the tool that generates the lockfile.
-
-* Javascript/Typescript
-  * `package-lock.json` (npm)
-  * `yarn.lock` (yarn)
-* Python
-  * `requirements.txt` (pip)
-  * `Pipfile.lock` (pipenv)
-  * `Pipfile` (pipenv)
-  * `poetry.lock` (poetry)
-* Ruby
-  * `Gemfile.lock` (gem)
-* C#
-  * `*.csproj` (nuget)
-* Java
-  * `pom.xml` (mvn)
-  * `gradle.lockfile` (gradle)
+If not explicitly specified, an attempt will be made to automatically detect the lockfile. Some lockfile types
+(e.g., Python/pip `requirements.txt`) are ambiguous in that they can be named differently and may or may not contain
+strict dependencies. In these cases, it is best to specify an explicit lockfile path by using the `phylum-ci --lockfile`
+option. The list of currently supported lockfiles can be found in the
+[Phylum Knowledge Base](https://docs.phylum.io/docs/analyzing-dependencies).
 
 ## Getting Started
 

@@ -1,11 +1,15 @@
 # Phylum Analyze PR action
 
-[![GitHub](https://img.shields.io/github/license/phylum-dev/phylum-analyze-pr-action)](https://github.com/phylum-dev/phylum-analyze-pr-action/blob/main/LICENSE)
-[![GitHub issues](https://img.shields.io/github/issues/phylum-dev/phylum-analyze-pr-action)](https://github.com/phylum-dev/phylum-analyze-pr-action/issues)
+[![GitHub](https://img.shields.io/github/license/phylum-dev/phylum-analyze-pr-action)][license]
+[![GitHub issues](https://img.shields.io/github/issues/phylum-dev/phylum-analyze-pr-action)][issues]
 ![GitHub last commit](https://img.shields.io/github/last-commit/phylum-dev/phylum-analyze-pr-action)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](./CODE_OF_CONDUCT.md)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)][CoC]
 
 A GitHub Action using Phylum to automatically analyze Pull Requests for changes to package manager lockfiles.
+
+[license]: https://github.com/phylum-dev/phylum-analyze-pr-action/blob/main/LICENSE
+[issues]: https://github.com/phylum-dev/phylum-analyze-pr-action/issues
+[CoC]: https://github.com/phylum-dev/phylum-analyze-pr-action/blob/main/CODE_OF_CONDUCT.md
 
 ## Overview
 
@@ -29,9 +33,9 @@ See [Phylum Risk Domains documentation](https://docs.phylum.io/docs/phylum-packa
 
 **NOTE**: It is not enough to have the total project threshold set. Individual risk domain threshold values must be set,
 either in the UI or with `phylum-ci` options, in order to enable analysis results for CI. Otherwise, the risk domain is
-considered disabled and the threshold value used will be zero (0).
+considered disabled and the overall project threshold value will be used.
 
-There will be no note if no dependencies were added or modified for a given MR.
+There will be no note if no dependencies were added or modified for a given PR.
 If one or more dependencies are still processing (no results available), then the note will make that clear and the CI
 job will only fail if dependencies that have _completed analysis results_ do not meet the specified project risk
 thresholds.
@@ -269,43 +273,6 @@ output as specified in the [Usage section of the `phylum-dev/phylum-ci` reposito
           cmd: phylum-ci -u 60 -m 60 -e 70 -c 90 -o 80 --lockfile requirements-prod.txt --all-deps
 ```
 
-## Continue on Error
-
-The above examples will fail the workflow when issues are found.
-If the desire is to ensure the workflow continues, even if Phylum finds issues with dependencies, then
-`continue-on-error` can be used at the [step level][1] and/or the [job level][2].
-
-[1]: https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepscontinue-on-error
-[2]: https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idcontinue-on-error
-
-This feature pairs nicely with the `--all-deps` and `--force-analysis` flags offered by the `phylum-ci` image.
-This can be useful for existing code bases that may not meet established project risk thresholds yet, but still want to
-know the full and current state of their dependency health.
-
-```yaml
-name: Example workflow using Phylum with continue on error
-on: pull_request
-jobs:
-  analyze_deps:
-    name: Analyze dependencies in a pull request with Phylum
-    permissions:
-      contents: read
-      pull-requests: write
-    runs-on: ubuntu-latest
-    continue-on-error: true     # This is the job level
-    steps:
-      - name: Checkout the repo with full history
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0        # Not really needed for `--all-deps`
-      - name: Analyze lockfile
-        continue-on-error: true # This is the step level
-        uses: phylum-dev/phylum-analyze-pr-action@v2
-        with:
-          phylum_token: ${{ secrets.PHYLUM_TOKEN }}
-          cmd: phylum-ci --all-deps
-```
-
 ## Example Comments
 
 ---
@@ -324,20 +291,24 @@ Phylum OSS Supply Chain Risk Analysis - SUCCESS
 
 ## License
 
-MIT - with complete text available in the [LICENSE](./LICENSE) file.
+MIT - with complete text available in the [LICENSE][license] file.
 
 ## Contributing
 
 Suggestions and help are welcome. Feel free to open an issue or otherwise contribute.
-More information is available on the [contributing documentation](./CONTRIBUTING.md) page.
+More information is available on the [contributing documentation][contributing] page.
+
+[contributing]: https://github.com/phylum-dev/phylum-analyze-pr-action/blob/main/CONTRIBUTING.md
 
 ## Code of Conduct
 
 Everyone participating in the `phylum-analyze-pr-action` project, and in particular in the issue tracker and pull
 requests, is expected to treat other people with respect and more generally to follow the guidelines articulated in the
-[Code of Conduct](./CODE_OF_CONDUCT.md).
+[Code of Conduct][CoC].
 
 ## Security Disclosures
 
-Found a security issue in this repository? See the [security policy](./SECURITY.md)
+Found a security issue in this repository? See the [security policy][security]
 for details on coordinated disclosure.
+
+[security]: https://github.com/phylum-dev/phylum-analyze-pr-action/blob/main/SECURITY.md

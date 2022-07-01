@@ -124,3 +124,42 @@ Before you submit a pull request, check that it meets these guidelines:
 * Have you updated all affected documentation?
 
 The pull request should work for all tests defined in the status checks.
+
+## Troubleshooting and Tips
+
+### Continue on Error
+
+The examples provided in the main README will fail the workflow when issues are found.
+If the desire is to ensure the workflow continues, even if Phylum finds issues with dependencies, then
+`continue-on-error` can be used at the [step level][1] and/or the [job level][2].
+
+[1]: https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepscontinue-on-error
+[2]: https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idcontinue-on-error
+
+This feature pairs nicely with the `--all-deps` and `--force-analysis` flags offered by the `phylum-ci` image.
+This can be useful for existing code bases that may not meet established project risk thresholds yet, but still want to
+know the full and current state of their dependency health.
+
+```yaml
+name: Example workflow using Phylum with continue on error
+on: pull_request
+jobs:
+  analyze_deps:
+    name: Analyze dependencies in a pull request with Phylum
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    continue-on-error: true     # This is the job level
+    steps:
+      - name: Checkout the repo with full history
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0        # Not really needed for `--all-deps`
+      - name: Analyze lockfile
+        continue-on-error: true # This is the step level
+        uses: phylum-dev/phylum-analyze-pr-action@v2
+        with:
+          phylum_token: ${{ secrets.PHYLUM_TOKEN }}
+          cmd: phylum-ci --all-deps
+```

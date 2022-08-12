@@ -101,7 +101,7 @@ Here's how to set up `phylum-analyze-pr-action` for local development.
     ```yaml
     # Change this entry in the `action.yml` file to point to your image. Reference:
     # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runsimage
-    image: docker://phylumio/phylum-ci:latest
+    image: docker://ghcr.io/phylum-dev/phylum-ci:latest
     ```
 
 4. Commit your changes and push your branch to GitHub:

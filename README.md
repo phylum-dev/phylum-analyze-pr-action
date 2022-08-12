@@ -48,7 +48,7 @@ The pre-requisites for using this image are:
 * Ability to run a [Docker container action][container]
   * GitHub-hosted runners must use an Ubuntu runner
   * Self-hosted runners must use a Linux operating system and have Docker installed
-* Access to the [phylumio/phylum-ci Docker image](https://hub.docker.com/r/phylumio/phylum-ci/tags)
+* Access to the `phylum-dev/phylum-ci` Docker image from the [GitHub Container Registry][package]
 * A [GitHub token][gh_token] with API access
   * Can be the default `GITHUB_TOKEN` provided automatically at the start of each workflow run
     * Needs at least write access for `pull-requests` scope - see [documentation][scopes]
@@ -66,6 +66,7 @@ The pre-requisites for using this image are:
     [`phylum project create`](https://docs.phylum.io/docs/phylum_project_create) command documentation
 
 [container]: https://docs.github.com/en/actions/creating-actions/creating-a-docker-container-action
+[package]: https://github.com/phylum-dev/phylum-ci/pkgs/container/phylum-ci
 [gh_token]: https://docs.github.com/en/actions/security-guides/automatic-token-authentication
 [scopes]: https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps#available-scopes
 [PAT]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token

@@ -222,11 +222,11 @@ Since they are sensitive, **care should be taken to protect them appropriately**
 The `cmd` arguments to the Docker image are the way to exert control over the execution of the Phylum analysis. The
 `phylum-ci` script entry point is expected to be called. It has a number of arguments that are all optional and
 defaulted to secure values. To view the arguments, their description, and default values, run the script with `--help`
-output as specified in the [Usage section of the `phylum-dev/phylum-ci` repository's README][usage] or view the
-[source code][src] directly.
+output as specified in the [Usage section of the `phylum-dev/phylum-ci` repository's README][usage] or more simply
+view the [script options output][script_options] for the latest release.
 
 [usage]: https://github.com/phylum-dev/phylum-ci#usage
-[src]: https://github.com/phylum-dev/phylum-ci/blob/main/src/phylum/ci/cli.py
+[script_options]: https://github.com/phylum-dev/phylum-ci/blob/main/docs/script_options.md
 
 ```yaml
     steps:

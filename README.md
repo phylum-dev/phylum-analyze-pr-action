@@ -292,7 +292,16 @@ Phylum OSS Supply Chain Risk Analysis - SUCCESS
 
 ## License
 
-MIT - with complete text available in the [LICENSE][license] file.
+Copyright (C) 2022  Phylum, Inc.
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+License as published by the Free Software Foundation, either version 3 of the License or any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.
+If not, see <https://www.gnu.org/licenses/gpl.html> or write to `phylum@phylum.io` or `engineering@phylum.io`
 
 ## Contributing
 

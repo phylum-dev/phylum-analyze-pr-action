@@ -275,21 +275,25 @@ view the [script options output][script_options] for the latest release.
           cmd: phylum-ci --lockfile requirements-prod.txt
           # Thresholds for the five risk domains may be set at the Phylum project level.
           # They can be set differently for CI environments to "fail the build."
-          cmd: >
-            phylum-ci --vul-threshold 60 --mal-threshold 60 --eng-threshold 70
-            --lic-threshold 90 --aut-threshold 80
+          cmd: |
+            phylum-ci \
+              --vul-threshold 60 \
+              --mal-threshold 60 \
+              --eng-threshold 70 \
+              --lic-threshold 90 \
+              --aut-threshold 80
           # Install a specific version of the Phylum CLI.
           cmd: phylum-ci --phylum-release 3.5.0 --force-install
           # Mix and match for your specific use case.
-          cmd: >
-            phylum-ci
-            --vul-threshold 60
-            --mal-threshold 60
-            --eng-threshold 70
-            --lic-threshold 90
-            --aut-threshold 80
-            --lockfile requirements-prod.txt
-            --all-deps
+          cmd: |
+            phylum-ci \
+              --vul-threshold 60 \
+              --mal-threshold 60 \
+              --eng-threshold 70 \
+              --lic-threshold 90 \
+              --aut-threshold 80 \
+              --lockfile requirements-prod.txt \
+              --all-deps
 ```
 
 ## Example Comments

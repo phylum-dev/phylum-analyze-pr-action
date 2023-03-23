@@ -18,7 +18,7 @@ strangers). Phylum evolved forward from legacy SCA tools to defend from supply-c
 authors, and engineering risk, in addtion to software vulnerabilities and license risks. To learn more, please see
 [our website](https://phylum.io).
 
-Once configured for a repository, this action will provide analysis of project dependencies from a lockfile during a
+Once configured for a repository, this action will provide analysis of project dependencies from lockfiles during a
 Pull Request (PR) and output the results as a comment on the PR.
 The CI job will return an error (i.e., fail the build) if any of the newly added/modified dependencies from the PR fail
 to meet the project risk thresholds for any of the five Phylum risk domains:
@@ -63,9 +63,6 @@ The pre-requisites for using this image are:
 * Access to the Phylum API endpoints
   * That usually means a connection to the internet, optionally via a proxy
   * Support for on-premises installs are not available at this time
-* A `.phylum_project` file exists at the root of the repository
-  * See [`phylum project`][phylum_project] and
-    [`phylum project create`][phylum_project_create] command documentation
 
 [container]: https://docs.github.com/en/actions/creating-actions/creating-a-docker-container-action
 [package]: https://github.com/phylum-dev/phylum-ci/pkgs/container/phylum-ci
@@ -76,14 +73,12 @@ The pre-requisites for using this image are:
 [app_register]: https://app.phylum.io/register
 [phylum_tokens]: https://docs.phylum.io/docs/api-keys
 [phylum_register]: https://docs.phylum.io/docs/phylum_auth_register
-[phylum_project]: https://docs.phylum.io/docs/phylum_project
-[phylum_project_create]: https://docs.phylum.io/docs/phylum_project_create
 
 ## Supported lockfiles
 
-If not explicitly specified, an attempt will be made to automatically detect the lockfile. Some lockfile types
+If not explicitly specified, an attempt will be made to automatically detect lockfiles. Some lockfile types
 (e.g., Python/pip `requirements.txt`) are ambiguous in that they can be named differently and may or may not contain
-strict dependencies. In these cases, it is best to specify an explicit lockfile path by using the `phylum-ci --lockfile`
+strict dependencies. In these cases, it is best to specify explicit lockfile paths by using the `phylum-ci --lockfile`
 option. The list of currently supported lockfiles can be found in the [Phylum Knowledge Base][supported_lockfiles].
 
 [supported_lockfiles]: https://docs.phylum.io/docs/analyzing-dependencies
@@ -107,7 +102,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Analyze lockfile
+      - name: Analyze dependencies
         uses: phylum-dev/phylum-analyze-pr-action@v2
         with:
           phylum_token: ${{ secrets.PHYLUM_TOKEN }}
@@ -240,7 +235,7 @@ view the [script options output][script_options] for the latest release.
 
 ```yaml
     steps:
-      - name: Analyze lockfile
+      - name: Analyze dependencies
         uses: phylum-dev/phylum-analyze-pr-action@v2
         with:
           # Contact Phylum (phylum.io/contact-us) or register (app.phylum.io/register) to gain access.
@@ -273,6 +268,8 @@ view the [script options output][script_options] for the latest release.
           # they can be named differently and may or may not contain strict dependencies.
           # In these cases, it is best to specify an explicit lockfile path.
           cmd: phylum-ci --lockfile requirements-prod.txt
+          # Specify multiple explicit lockfile paths
+          cmd: phylum-ci --lockfile requirements-prod.txt path/to/lock.file
           # Thresholds for the five risk domains may be set at the Phylum project level.
           # They can be set differently for CI environments to "fail the build."
           cmd: |
@@ -283,7 +280,7 @@ view the [script options output][script_options] for the latest release.
               --lic-threshold 90 \
               --aut-threshold 80
           # Install a specific version of the Phylum CLI.
-          cmd: phylum-ci --phylum-release 3.5.0 --force-install
+          cmd: phylum-ci --phylum-release 4.5.0 --force-install
           # Mix and match for your specific use case.
           cmd: |
             phylum-ci \
@@ -302,7 +299,7 @@ view the [script options output][script_options] for the latest release.
 
 Phylum OSS Supply Chain Risk Analysis - FAILED
 
-![image](https://user-images.githubusercontent.com/18729796/175793030-1294695d-6e72-405a-8916-444e476ab7ee.png)
+![image](https://user-images.githubusercontent.com/18729796/227348546-1ff2cc69-ab43-4d3c-b721-8aaaa4164714.png)
 
 ---
 

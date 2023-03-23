@@ -28,7 +28,7 @@ inputs:
 runs:
   using: docker
   # image: docker://ghcr.io/phylum-dev/phylum-ci:latest
-  image: maxrake/phylum-ci:project_shun
+  image: docker://maxrake/phylum-ci:project_shun
   entrypoint: entrypoint.sh
   env:
     GITHUB_TOKEN: ${{ inputs.github_token }}

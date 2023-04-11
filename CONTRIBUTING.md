@@ -137,7 +137,7 @@ If the desire is to ensure the workflow continues, even if Phylum finds issues w
 [2]: https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idcontinue-on-error
 
 This feature pairs nicely with the `--all-deps` and `--force-analysis` flags offered by the `phylum-ci` image.
-This can be useful for existing code bases that may not meet established project risk thresholds yet, but still want to
+This can be useful for existing code bases that may not meet established policy rules yet, but still want to
 know the full and current state of their dependency health.
 
 ```yaml

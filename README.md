@@ -21,26 +21,11 @@ authors, and engineering risk, in addtion to software vulnerabilities and licens
 Once configured for a repository, this action will provide analysis of project dependencies from lockfiles during a
 Pull Request (PR) and output the results as a comment on the PR.
 The CI job will return an error (i.e., fail the build) if any of the newly added/modified dependencies from the PR fail
-to meet the project risk thresholds for any of the five Phylum risk domains:
-
-* Vulnerability (aka `vul`)
-* Malicious Code (aka `mal`)
-* Engineering (aka `eng`)
-* License (aka `lic`)
-* Author (aka `aut`)
-
-See [Phylum Risk Domains documentation][risk_domains] for more detail.
-
-**NOTE**: It is not enough to have the total project threshold set. Individual risk domain threshold values must be set,
-either in the UI or with `phylum-ci` options, in order to enable analysis results for CI. Otherwise, the risk domain is
-considered disabled and the overall project threshold value will be used.
+to meet the established policy.
 
 There will be no note if no dependencies were added or modified for a given PR.
 If one or more dependencies are still processing (no results available), then the note will make that clear and the CI
-job will only fail if dependencies that have _completed analysis results_ do not meet the specified project risk
-thresholds.
-
-[risk_domains]: https://docs.phylum.io/docs/phylum-package-score#risk-domains
+job will only fail if dependencies that have _completed analysis results_ do not meet the active policy.
 
 ## Prerequisites
 
@@ -255,12 +240,12 @@ view the [script options output][script_options] for the latest release.
           #
           # Use the defaults for all the arguments.
           # The default behavior is to only analyze newly added dependencies against
-          # the risk domain threshold levels set at the Phylum project level.
+          # the active policy set at the Phylum project level.
           # This entry does not have to be specified since it is the default.
           cmd: phylum-ci
           # Consider all dependencies in analysis results instead of just the newly added ones.
           # The default is to only analyze newly added dependencies, which can be useful for
-          # existing code bases that may not meet established project risk thresholds yet,
+          # existing code bases that may not meet established policy rules yet,
           # but don't want to make things worse. Specifying `--all-deps` can be useful for
           # casting the widest net for strict adherence to Quality Assurance (QA) standards.
           cmd: phylum-ci --all-deps
@@ -270,26 +255,13 @@ view the [script options output][script_options] for the latest release.
           cmd: phylum-ci --lockfile requirements-prod.txt
           # Specify multiple explicit lockfile paths
           cmd: phylum-ci --lockfile requirements-prod.txt path/to/lock.file
-          # Thresholds for the five risk domains may be set at the Phylum project level.
-          # They can be set differently for CI environments to "fail the build."
-          cmd: |
-            phylum-ci \
-              --vul-threshold 60 \
-              --mal-threshold 60 \
-              --eng-threshold 70 \
-              --lic-threshold 90 \
-              --aut-threshold 80
           # Install a specific version of the Phylum CLI.
-          cmd: phylum-ci --phylum-release 4.5.0 --force-install
+          cmd: phylum-ci --phylum-release 4.8.0 --force-install
           # Mix and match for your specific use case.
           cmd: |
             phylum-ci \
-              --vul-threshold 60 \
-              --mal-threshold 60 \
-              --eng-threshold 70 \
-              --lic-threshold 90 \
-              --aut-threshold 80 \
-              --lockfile requirements-prod.txt \
+              --lockfile requirements-dev.txt \
+              --lockfile requirements-prod.txt path/to/lock.file \
               --all-deps
 ```
 

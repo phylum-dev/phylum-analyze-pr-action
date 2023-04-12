@@ -27,7 +27,9 @@ inputs:
     default: phylum-ci
 runs:
   using: docker
-  image: docker://ghcr.io/phylum-dev/phylum-ci:latest
+  # TODO: Revert this before merging!!!
+  #image: docker://ghcr.io/phylum-dev/phylum-ci:latest
+  image: docker://maxrake/phylum-ci:policy
   entrypoint: entrypoint.sh
   env:
     GITHUB_TOKEN: ${{ inputs.github_token }}

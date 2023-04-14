@@ -271,13 +271,25 @@ view the [script options output][script_options] for the latest release.
 
 Phylum OSS Supply Chain Risk Analysis - FAILED
 
-![image](https://user-images.githubusercontent.com/18729796/227348546-1ff2cc69-ab43-4d3c-b721-8aaaa4164714.png)
+![image](https://user-images.githubusercontent.com/18729796/232164049-0e394d1f-f709-403f-a12c-2fe26adfbb37.png)
+
+---
+
+Phylum OSS Supply Chain Risk Analysis - INCOMPLETE WITH FAILURE
+
+![image](https://user-images.githubusercontent.com/18729796/232165295-61a4800b-0f3b-46b8-9c4b-1215b1aab83a.png)
+
+---
+
+Phylum OSS Supply Chain Risk Analysis - INCOMPLETE
+
+![image](https://user-images.githubusercontent.com/18729796/232165075-25116fb4-7706-4ebf-948c-9b593c7cd28b.png)
 
 ---
 
 Phylum OSS Supply Chain Risk Analysis - SUCCESS
 
-![image](https://user-images.githubusercontent.com/18729796/175792822-860e708e-7b8f-4ae3-b43b-28912c6ec7d2.png)
+![image](https://user-images.githubusercontent.com/18729796/232164498-3ce7d24a-a4ec-4df3-92b2-ab38555703b9.png)
 
 ---
 

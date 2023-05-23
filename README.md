@@ -243,6 +243,8 @@ view the [script options output][script_options] for the latest release.
           # the active policy set at the Phylum project level.
           # This entry does not have to be specified since it is the default.
           cmd: phylum-ci
+          # Provide debug level output
+          cmd: phylum-ci -vv
           # Consider all dependencies in analysis results instead of just the newly added ones.
           # The default is to only analyze newly added dependencies, which can be useful for
           # existing code bases that may not meet established policy rules yet,
@@ -260,6 +262,7 @@ view the [script options output][script_options] for the latest release.
           # Mix and match for your specific use case.
           cmd: |
             phylum-ci \
+              -vv \
               --lockfile requirements-dev.txt \
               --lockfile requirements-prod.txt path/to/lock.file \
               --all-deps

@@ -66,7 +66,7 @@ If not explicitly specified, an attempt will be made to automatically detect loc
 strict dependencies. In these cases, it is best to specify explicit lockfile paths by using the `phylum-ci --lockfile`
 option. The list of currently supported lockfiles can be found in the [Phylum Knowledge Base][supported_lockfiles].
 
-[supported_lockfiles]: https://docs.phylum.io/docs/analyzing-dependencies
+[supported_lockfiles]: https://docs.phylum.io/docs/supported_lockfiles
 
 ## Getting Started
 

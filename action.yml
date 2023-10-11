@@ -14,10 +14,6 @@ branding:
   icon:  check-circle
   color: blue
 inputs:
-  image:
-    description: Docker image to use when running this action
-    required: true
-    default: docker://ghcr.io/phylum-dev/phylum-ci:latest
   github_token:
     description: GITHUB_TOKEN with at least write access to pull-requests scope or a repo scoped PAT
     required: true
@@ -31,7 +27,7 @@ inputs:
     default: phylum-ci
 runs:
   using: docker
-  image: ${{ inputs.image }}
+  image: docker://ghcr.io/phylum-dev/phylum-ci:latest
   entrypoint: entrypoint.sh
   env:
     GITHUB_TOKEN: ${{ inputs.github_token }}

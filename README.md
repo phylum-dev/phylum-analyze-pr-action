@@ -5,7 +5,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/phylum-dev/phylum-analyze-pr-action)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)][CoC]
 
-A GitHub Action using Phylum to automatically analyze Pull Requests for changes to package manager lockfiles.
+A GitHub Action using Phylum to automatically analyze Pull Requests for changes to package manager dependency files.
 
 [license]: https://github.com/phylum-dev/phylum-analyze-pr-action/blob/main/LICENSE
 [issues]: https://github.com/phylum-dev/phylum-analyze-pr-action/issues
@@ -15,11 +15,11 @@ A GitHub Action using Phylum to automatically analyze Pull Requests for changes 
 
 Phylum provides a complete risk analyis of "open-source packages" (read: untrusted software from random Internet
 strangers). Phylum evolved forward from legacy SCA tools to defend from supply-chain malware, malicious open-source
-authors, and engineering risk, in addtion to software vulnerabilities and license risks. To learn more, please see
+authors, and engineering risk, in addition to software vulnerabilities and license risks. To learn more, please see
 [our website](https://phylum.io).
 
-Once configured for a repository, this action will provide analysis of project dependencies from lockfiles during a
-Pull Request (PR) and output the results as a comment on the PR.
+Once configured for a repository, this action will provide analysis of project dependencies from lockfiles or manifests
+during a Pull Request (PR) and output the results as a comment on the PR.
 The CI job will return an error (i.e., fail the build) if any of the newly added/modified dependencies from the PR fail
 to meet the established policy.
 
@@ -59,14 +59,28 @@ The pre-requisites for using this image are:
 [phylum_tokens]: https://docs.phylum.io/docs/api-keys
 [phylum_register]: https://docs.phylum.io/docs/phylum_auth_register
 
-## Supported lockfiles
+## Supported Dependency Files
 
-If not explicitly specified, an attempt will be made to automatically detect lockfiles. Some lockfile types
-(e.g., Python/pip `requirements.txt`) are ambiguous in that they can be named differently and may or may not contain
-strict dependencies. In these cases, it is best to specify explicit lockfile paths by using the `phylum-ci --lockfile`
-option. The list of currently supported lockfiles can be found in the [Phylum Knowledge Base][supported_lockfiles].
+If not explicitly specified, an attempt will be made to automatically detect dependency files. These include both
+lockfiles and manifests. The basic difference is that manifests are where top-level dependencies are specified in their
+loose form while lockfiles contain the completely resolved collection of the abstract declarations from a manifest.
+
+Some dependency file types (e.g., Python/pip `requirements.txt`) are ambiguous in that they can be named differently
+and may or may not contain strict dependencies. That is, they can be either a lockfile or a manifest. We call these
+"[lockifests]." Some dependency files fail to parse as the expected lockfile type (e.g., `pip` instead of `poetry` for
+`pyproject.toml` manifests).
+
+For these situation, the recommendation is to specify the path and lockfile type explicitly in a `.phylum_project` file
+at the root of the project repository. The easiest way to do that is with the Phylum CLI, using the
+[`phylum init` command][phylum_init] and committing the generated `.phylum_project` file.
+
+The Phylum Knowledge Base contains the list of currently [supported lockfiles][supported_lockfiles]. It is also where
+information on [lockfile generation][lockfile_generation] can be found for current manifest file support.
 
 [supported_lockfiles]: https://docs.phylum.io/docs/supported_lockfiles
+[lockfile_generation]: https://docs.phylum.io/docs/lockfile_generation
+[lockifests]: https://docs.phylum.io/docs/lockfile_generation#lockifests
+[phylum_init]: https://docs.phylum.io/docs/phylum_init
 
 ## Getting Started
 
@@ -84,7 +98,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Analyze dependencies
@@ -175,14 +189,14 @@ Self-hosted runners must use a Linux operating system and have Docker installed.
 
 ### Checking out the Repository
 
-`git` is used within the `phylum-ci` package to do things like determine if there was a lockfile change and,
+`git` is used within the `phylum-ci` package to do things like determine if there was a dependency file change and,
 when specified, report on new dependencies only. Therefore, a clone of the repository is required to ensure that
 the local working copy is always pristine and history is available to pull the requested information.
 
 ```yaml
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Specifying a depth of 0 ensures all history for all branches.
           # This input may not be required when `--all-deps` option is used.
@@ -251,11 +265,21 @@ view the [script options output][script_options] for the latest release.
           # but don't want to make things worse. Specifying `--all-deps` can be useful for
           # casting the widest net for strict adherence to Quality Assurance (QA) standards.
           cmd: phylum-ci --all-deps
+          # Force analysis, even when no dependency file has changed. This can be useful for
+          # manifests, where the loosely specified dependencies may not change often but the
+          # completely resolved set of strict dependencies does.
+          cmd: phylum-ci --force-analysis
+          # Force analysis for all dependencies in a manifest file. This is especially useful
+          # for *workspace* manifest files where there is no companion lockfile (e.g., libraries).
+          cmd: phylum-ci --force-analysis --all-deps --lockfile Cargo.toml
           # Some lockfile types (e.g., Python/pip `requirements.txt`) are ambiguous in that
           # they can be named differently and may or may not contain strict dependencies.
-          # In these cases, it is best to specify an explicit lockfile path.
+          # In these cases it is best to specify an explicit path, either with the `--lockfile`
+          # option or in a `.phylum_project` file. The easiest way to do that is with the
+          # Phylum CLI, using the `phylum init` command (https://docs.phylum.io/docs/phylum_init)
+          # and committing the generated `.phylum_project` file.
           cmd: phylum-ci --lockfile requirements-prod.txt
-          # Specify multiple explicit lockfile paths
+          # Specify multiple explicit dependency file paths
           cmd: phylum-ci --lockfile requirements-prod.txt path/to/lock.file
           # Install a specific version of the Phylum CLI.
           cmd: phylum-ci --phylum-release 4.8.0 --force-install
@@ -265,6 +289,8 @@ view the [script options output][script_options] for the latest release.
               -vv \
               --lockfile requirements-dev.txt \
               --lockfile requirements-prod.txt path/to/lock.file \
+              --lockfile Cargo.toml \
+              --force-analysis \
               --all-deps
 ```
 
@@ -295,6 +321,104 @@ Phylum OSS Supply Chain Risk Analysis - SUCCESS
 ![image](https://user-images.githubusercontent.com/18729796/232164498-3ce7d24a-a4ec-4df3-92b2-ab38555703b9.png)
 
 ---
+
+## Alternatives
+
+The default `phylum-ci` Docker image contains `git` and the installed `phylum` Python package. It also contains an
+installed version of the Phylum CLI and all required tools needed for [lockfile generation][lockfile_generation].
+An advantage of using the default Docker image is that the complete environment is packaged and made available with
+components that are known to work together.
+
+One disadvantage to the default image is it's size. It can take a while to download and may provide more tools than
+required for your specific use case. Special `slim` tags of the `phylum-ci` image are provided as an alternative.
+These tags differ from the default image in that they do not contain the required tools needed for
+[lockfile generation][lockfile_generation] (with the exception of the `pip` tool). The `slim` tags are significantly
+smaller and allow for faster action run times. They are useful for those instances where **no** manifest files are
+present and/or **only** lockfiles are used.
+
+Using the slim image tags is possible by altering your workflow to use the image directly instead of this GitHub
+Action. That is possible with either [container jobs](#container-jobs) or [container steps](#container-steps).
+
+### Container Jobs
+
+GitHub Actions allows for workflows to run a job within a container, using the `container:` statement in the workflow
+file. These are known as container jobs. More information can be found in GitHub documentation:
+["Running jobs in a container"][container_job]. To use a `slim` tag in a container job, use this minimal configuration:
+
+```yaml
+name: Phylum_analyze
+on: pull_request
+jobs:
+  analyze_deps:
+    name: Analyze dependencies with Phylum
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/phylum-dev/phylum-ci:slim
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        PHYLUM_API_KEY: ${{ secrets.PHYLUM_TOKEN }}
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Analyze dependencies
+        run: phylum-ci -vv
+```
+
+The `image:` value is set to the latest slim image, but other tags are available to ensure a specific release of the
+`phylum-ci` project and a specific version of the Phylum CLI. The full list of available `phylum-ci` image tags can be
+viewed on [GitHub Container Registry][ghcr_tags] (preferred) or [Docker Hub][docker_hub_tags].
+
+The `GITHUB_TOKEN` and `PHYLUM_API_KEY` environment variables are required to have those exact names. The rest of the
+options are the same as [already documented](#getting-started).
+
+[container_job]: https://docs.github.com/actions/using-jobs/running-jobs-in-a-container
+[ghcr_tags]: https://github.com/phylum-dev/phylum-ci/pkgs/container/phylum-ci
+[docker_hub_tags]: https://hub.docker.com/r/phylumio/phylum-ci/tags
+
+### Container Steps
+
+GitHub Actions allows for workflows to run a step within a container, by specifying that container image in the `uses:`
+statement of the workflow step. These are known as container steps. More information can be found in
+[GitHub workflow syntax documentation][container_step]. To use a `slim` tag in a container step, use this minimal
+configuration:
+
+```yaml
+name: Phylum_analyze
+on: pull_request
+jobs:
+  analyze_deps:
+    name: Analyze dependencies with Phylum
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Analyze dependencies
+        uses: docker://ghcr.io/phylum-dev/phylum-ci:slim
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PHYLUM_API_KEY: ${{ secrets.PHYLUM_TOKEN }}
+        with:
+          args: phylum-ci -vv
+```
+
+The `uses:` value is set to the latest slim image, but other tags are available to ensure a specific release of the
+`phylum-ci` project and a specific version of the Phylum CLI. The full list of available `phylum-ci` image tags can be
+viewed on [GitHub Container Registry][ghcr_tags] (preferred) or [Docker Hub][docker_hub_tags].
+
+The `GITHUB_TOKEN` and `PHYLUM_API_KEY` environment variables are required to have those exact names. The rest of the
+options are the same as [already documented](#getting-started).
+
+[container_step]: https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsuses
 
 ## License
 

@@ -70,7 +70,7 @@ and may or may not contain strict dependencies. That is, they can be either a lo
 "[lockifests]." Some dependency files fail to parse as the expected lockfile type (e.g., `pip` instead of `poetry` for
 `pyproject.toml` manifests).
 
-For these situation, the recommendation is to specify the path and lockfile type explicitly in a `.phylum_project` file
+For these situations, the recommendation is to specify the path and lockfile type explicitly in a `.phylum_project` file
 at the root of the project repository. The easiest way to do that is with the Phylum CLI, using the
 [`phylum init` command][phylum_init] and committing the generated `.phylum_project` file.
 

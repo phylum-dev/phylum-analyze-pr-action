@@ -5,7 +5,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/phylum-dev/phylum-analyze-pr-action)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)][CoC]
 
-A GitHub Action using Phylum to automatically analyze Pull Requests for changes to package manager dependency files.
+A GitHub Action to analyze dependencies with Phylum to protect your code against increasingly sophisticated attacks and get peace of mind to focus on your work.
 
 [license]: https://github.com/phylum-dev/phylum-analyze-pr-action/blob/main/LICENSE
 [issues]: https://github.com/phylum-dev/phylum-analyze-pr-action/issues
@@ -45,6 +45,7 @@ The pre-requisites for using this image are:
   * [Contact Phylum][phylum_contact] or [register][app_register] to gain access
     * See also [`phylum auth register`][phylum_register] command documentation
   * Consider using a bot or group account for this token
+  * Forked repos require the `pull_request_target` event, to allow secret access
 * Access to the Phylum API endpoints
   * That usually means a connection to the internet, optionally via a proxy
   * Support for on-premises installs are not available at this time
@@ -150,6 +151,35 @@ on:
       - develop
 ```
 
+Allowing pull requests from forked repositories requires using the `pull_request_target` event since the Phylum API
+key is stored as a secret and the `pull_request` event does not provide access to secrets when the PR comes from a
+fork.
+
+```yaml
+on:
+  pull_request:
+  # Allow PRs from forked repos to access secrets, like the Phylum API key
+  pull_request_target:
+```
+
+> ⚠️ **WARNING** ⚠️
+>
+> Using the `pull_request_target` event for forked repositories requires additional configuration when
+> [checking out the repo](#checking-out-the-repository). Be aware that such a configuration has security implications
+> if done improperly. Please take the time to understand and mitigate the risks:
+>
+> * GitHub Security Lab: ["Preventing pwn requests"][gh_pwn]
+> * GitGuardian: ["GitHub Actions Security Best Practices"][gha_security]
+>
+> Minimal suggestions include:
+>
+> * Use a separate workflow for the Phylum Analyze PR action
+> * Do not provide access to any secrets beyond the Phylum API key
+> * Limit the steps in the job to two: checking out the PR's code and using the Phylum action
+
+[gh_pwn]: https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+[gha_security]: https://blog.gitguardian.com/github-actions-security-cheat-sheet/
+
 ### Permissions
 
 When using the default `GITHUB_TOKEN` provided automatically at the start of each workflow run, it is good practice to
@@ -202,6 +232,34 @@ the local working copy is always pristine and history is available to pull the r
           # This input may not be required when `--all-deps` option is used.
           fetch-depth: 0
 ```
+
+Allowing pull requests from forked repositories [requires using the `pull_request_target` event](#workflow-trigger)
+and checking out the head of the forked repository:
+
+```yaml
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Specifying the head of the forked repository's PR branch
+          # is required to get any proposed dependency file changes.
+          ref: ${{ github.event.pull_request.head.sha }}
+```
+
+> ⚠️ **WARNING** ⚠️
+>
+> Using the `pull_request_target` event for forked repositories and checking out the pull request's code has security
+> implications if done improperly. Please take the time to understand and mitigate the risks:
+>
+> * GitHub Security Lab: ["Preventing pwn requests"][gh_pwn]
+> * GitGuardian: ["GitHub Actions Security Best Practices"][gha_security]
+>
+> Minimal suggestions include:
+>
+> * Use a separate workflow for the Phylum Analyze PR action
+> * Do not provide access to any secrets beyond the Phylum API key
+> * Limit the steps in the job to two: checking out the PR's code and using the Phylum action
 
 ### Action Inputs
 
@@ -280,7 +338,7 @@ view the [script options output][script_options] for the latest release.
           # and committing the generated `.phylum_project` file.
           cmd: phylum-ci --lockfile requirements-prod.txt
           # Specify multiple explicit dependency file paths
-          cmd: phylum-ci --lockfile requirements-prod.txt path/to/lock.file
+          cmd: phylum-ci --lockfile requirements-prod.txt path/to/dependency.file
           # Install a specific version of the Phylum CLI.
           cmd: phylum-ci --phylum-release 4.8.0 --force-install
           # Mix and match for your specific use case.
@@ -288,7 +346,7 @@ view the [script options output][script_options] for the latest release.
             phylum-ci \
               -vv \
               --lockfile requirements-dev.txt \
-              --lockfile requirements-prod.txt path/to/lock.file \
+              --lockfile requirements-prod.txt path/to/dependency.file \
               --lockfile Cargo.toml \
               --force-analysis \
               --all-deps

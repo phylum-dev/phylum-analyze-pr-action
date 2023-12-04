@@ -85,7 +85,7 @@ information on [lockfile generation][lockfile_generation] can be found for curre
 
 ## Getting Started
 
-Phylum analysis of dependencies can be added to existing CI workflows or on it's own with this minimal configuration:
+Phylum analysis of dependencies can be added to existing CI workflows or on its own with this minimal configuration:
 
 ```yaml
 name: Phylum_analyze
@@ -166,7 +166,8 @@ on:
 >
 > Using the `pull_request_target` event for forked repositories requires additional configuration when
 > [checking out the repo](#checking-out-the-repository). Be aware that such a configuration has security implications
-> if done improperly. Please take the time to understand and mitigate the risks:
+> if done improperly. Attackers may be able to obtain repository write permissions or steal repository secrets.
+> Please take the time to understand and mitigate the risks:
 >
 > * GitHub Security Lab: ["Preventing pwn requests"][gh_pwn]
 > * GitGuardian: ["GitHub Actions Security Best Practices"][gha_security]
@@ -250,7 +251,8 @@ and checking out the head of the forked repository:
 > ⚠️ **WARNING** ⚠️
 >
 > Using the `pull_request_target` event for forked repositories and checking out the pull request's code has security
-> implications if done improperly. Please take the time to understand and mitigate the risks:
+> implications if done improperly. Attackers may be able to obtain repository write permissions or steal repository
+> secrets. Please take the time to understand and mitigate the risks:
 >
 > * GitHub Security Lab: ["Preventing pwn requests"][gh_pwn]
 > * GitGuardian: ["GitHub Actions Security Best Practices"][gha_security]
@@ -263,7 +265,7 @@ and checking out the head of the forked repository:
 
 ### Action Inputs
 
-The action inputs are used to ensure the `phylum-ci` tool is able to perform it's job.
+The action inputs are used to ensure the `phylum-ci` tool is able to perform its job.
 
 A [Phylum token][phylum_tokens] with API access is required to perform analysis on project dependencies.
 [Contact Phylum][phylum_contact] or [register][app_register] to gain access.
@@ -387,7 +389,7 @@ installed version of the Phylum CLI and all required tools needed for [lockfile 
 An advantage of using the default Docker image is that the complete environment is packaged and made available with
 components that are known to work together.
 
-One disadvantage to the default image is it's size. It can take a while to download and may provide more tools than
+One disadvantage to the default image is its size. It can take a while to download and may provide more tools than
 required for your specific use case. Special `slim` tags of the `phylum-ci` image are provided as an alternative.
 These tags differ from the default image in that they do not contain the required tools needed for
 [lockfile generation][lockfile_generation] (with the exception of the `pip` tool). The `slim` tags are significantly

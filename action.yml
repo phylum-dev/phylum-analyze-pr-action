@@ -9,7 +9,7 @@
 ---
 name: Phylum Analyze PR
 author: Phylum, Inc. <engineering@phylum.io>
-description: Analyze dependencies with Phylum to protect your code against increasingly sophisticated attacks and get peace of mind to focus on your work
+description: Scan dependencies with Phylum to block software supply chain attacks
 branding:
   icon:  check-circle
   color: blue

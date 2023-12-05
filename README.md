@@ -480,6 +480,55 @@ options are the same as [already documented](#getting-started).
 
 [container_step]: https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsuses
 
+## FAQs
+
+### Why does Phylum report a failing status check if it shows a successful analysis comment?
+
+It is possible to get a successful Phylum analysis comment on the PR **and also** have the Phylum action report a
+failing status check. This happens when one or more dependency files fails the filtering process while at least one
+dependency file passes the filtering process **and** the Phylum analysis.
+
+The failing status check is meant to serve as an indication to the repository owner that an issue exists with at least
+one of the dependency files submitted, whether they intended it or not. The reasoning is that it is better to be
+explicit about possible failures, allowing for review of the logs and correction, than to silently ignore the failure
+and possibly allow untrusted code into the repository.
+
+There are several reasons a dependency file may fail the filtering process and each failure will be included in the logs
+as a warning. The file may not exist or it may exist, but only as an empty file. The file may fail to be parsed by
+Phylum. The dependency files can be manifests or lockfiles and they can either be provided explicitly or automatically
+detected when not provided. Sometimes the automatic detection will misattribute a file as a manifest or assign the wrong
+lockfile type. As detailed in the ["Supported Dependency Files"](#supported-dependency-files) section, the
+recommendation for this situation is to specify the path and lockfile type explicitly in a `.phylum_project` file at
+the root of the project repository.
+
+### Why does analysis fail for PRs from forked repositories?
+
+Another reason why Phylum reports
+[failing status checks](#why-does-phylum-report-a-failing-status-check-if-it-shows-a-successful-analysis-comment) is for
+`pull_request_target` events where manifests are provided. Using `pull_request_target` events for forked repositories
+has security implications if done improperly. Attackers may be able to obtain repository write permissions or steal
+repository secrets. A more comprehensive enumeration of the risks can be found here:
+
+* GitHub Security Lab: ["Preventing pwn requests"][gh_pwn]
+* GitGuardian: ["GitHub Actions Security Best Practices"][gha_security]
+
+This GitHub action disables lockfile generation to prevent arbitrary code execution in an untrusted context, like PRs
+from forks. This means that provided manifests are unable to be parsed by Phylum since parsing first requires generating
+a lockfile from the manifest. A unique error code and warning message is provided so as to better signal the
+implication: the resolved dependencies from the manifest have NOT been analyzed by Phylum. Care should be taken to
+inspect changes manually before allowing a manifest to be used in a trusted context.
+
+One way to avoid this situation and enable automatic Phylum analysis is to add a lockfile instead of or along with the
+manifest. This is recommended even for libraries. A great case for why
+[lockfiles should be committed on **all** projects][lockfiles_always] was made by the folks who built the Yarn package
+manager for the npm ecosystem and the same advice applies to other ecosystems. Adding the lockfile is good, but it will
+need to be paired with additional workflow logic that requires it to be updated and current with the corresponding
+manifest as part of the PR submission. Otherwise, it will be possible to supply a valid and benign lockfile while
+updating the manifest with malicious entries (perhaps transitively) to be included the next time the lockfile is
+refreshed.
+
+[lockfiles_always]: https://classic.yarnpkg.com/blog/2016/11/24/lockfiles-for-all/
+
 ## License
 
 Copyright (C) 2022  Phylum, Inc.

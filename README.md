@@ -518,17 +518,6 @@ a lockfile from the manifest. A unique error code and warning message is provide
 implication: the resolved dependencies from the manifest have NOT been analyzed by Phylum. Care should be taken to
 inspect changes manually before allowing a manifest to be used in a trusted context.
 
-One way to avoid this situation and enable automatic Phylum analysis is to add a lockfile instead of or along with the
-manifest. This is recommended even for libraries. A great case for why
-[lockfiles should be committed on **all** projects][lockfiles_always] was made by the folks who built the Yarn package
-manager for the npm ecosystem and the same advice applies to other ecosystems. Adding the lockfile is good, but it will
-need to be paired with additional workflow logic that requires it to be updated and current with the corresponding
-manifest as part of the PR submission. Otherwise, it will be possible to supply a valid and benign lockfile while
-updating the manifest with malicious entries (perhaps transitively) to be included the next time the lockfile is
-refreshed.
-
-[lockfiles_always]: https://classic.yarnpkg.com/blog/2016/11/24/lockfiles-for-all/
-
 ## License
 
 Copyright (C) 2022  Phylum, Inc.

@@ -5,7 +5,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/phylum-dev/phylum-analyze-pr-action)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)][CoC]
 
-A GitHub Action using Phylum to automatically analyze Pull Requests for changes to package manager dependency files.
+A GitHub Action to analyze dependencies with Phylum to protect your code against increasingly sophisticated attacks and get peace of mind to focus on your work.
 
 [license]: https://github.com/phylum-dev/phylum-analyze-pr-action/blob/main/LICENSE
 [issues]: https://github.com/phylum-dev/phylum-analyze-pr-action/issues
@@ -45,6 +45,7 @@ The pre-requisites for using this image are:
   * [Contact Phylum][phylum_contact] or [register][app_register] to gain access
     * See also [`phylum auth register`][phylum_register] command documentation
   * Consider using a bot or group account for this token
+  * Forked repos require the `pull_request_target` event, to allow secret access
 * Access to the Phylum API endpoints
   * That usually means a connection to the internet, optionally via a proxy
   * Support for on-premises installs are not available at this time
@@ -84,7 +85,7 @@ information on [lockfile generation][lockfile_generation] can be found for curre
 
 ## Getting Started
 
-Phylum analysis of dependencies can be added to existing CI workflows or on it's own with this minimal configuration:
+Phylum analysis of dependencies can be added to existing CI workflows or on its own with this minimal configuration:
 
 ```yaml
 name: Phylum_analyze
@@ -150,6 +151,36 @@ on:
       - develop
 ```
 
+Allowing pull requests from forked repositories requires using the `pull_request_target` event since the Phylum API
+key is stored as a secret and the `pull_request` event does not provide access to secrets when the PR comes from a
+fork.
+
+```yaml
+on:
+  pull_request:
+  # Allow PRs from forked repos to access secrets, like the Phylum API key
+  pull_request_target:
+```
+
+> ⚠️ **WARNING** ⚠️
+>
+> Using the `pull_request_target` event for forked repositories requires additional configuration when
+> [checking out the repo](#checking-out-the-repository). Be aware that such a configuration has security implications
+> if done improperly. Attackers may be able to obtain repository write permissions or steal repository secrets.
+> Please take the time to understand and mitigate the risks:
+>
+> * GitHub Security Lab: ["Preventing pwn requests"][gh_pwn]
+> * GitGuardian: ["GitHub Actions Security Best Practices"][gha_security]
+>
+> Minimal suggestions include:
+>
+> * Use a separate workflow for the Phylum Analyze PR action
+> * Do not provide access to any secrets beyond the Phylum API key
+> * Limit the steps in the job to two: checking out the PR's code and using the Phylum action
+
+[gh_pwn]: https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+[gha_security]: https://blog.gitguardian.com/github-actions-security-cheat-sheet/
+
 ### Permissions
 
 When using the default `GITHUB_TOKEN` provided automatically at the start of each workflow run, it is good practice to
@@ -203,9 +234,38 @@ the local working copy is always pristine and history is available to pull the r
           fetch-depth: 0
 ```
 
+Allowing pull requests from forked repositories [requires using the `pull_request_target` event](#workflow-trigger)
+and checking out the head of the forked repository:
+
+```yaml
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Specifying the head of the forked repository's PR branch
+          # is required to get any proposed dependency file changes.
+          ref: ${{ github.event.pull_request.head.sha }}
+```
+
+> ⚠️ **WARNING** ⚠️
+>
+> Using the `pull_request_target` event for forked repositories and checking out the pull request's code has security
+> implications if done improperly. Attackers may be able to obtain repository write permissions or steal repository
+> secrets. Please take the time to understand and mitigate the risks:
+>
+> * GitHub Security Lab: ["Preventing pwn requests"][gh_pwn]
+> * GitGuardian: ["GitHub Actions Security Best Practices"][gha_security]
+>
+> Minimal suggestions include:
+>
+> * Use a separate workflow for the Phylum Analyze PR action
+> * Do not provide access to any secrets beyond the Phylum API key
+> * Limit the steps in the job to two: checking out the PR's code and using the Phylum action
+
 ### Action Inputs
 
-The action inputs are used to ensure the `phylum-ci` tool is able to perform it's job.
+The action inputs are used to ensure the `phylum-ci` tool is able to perform its job.
 
 A [Phylum token][phylum_tokens] with API access is required to perform analysis on project dependencies.
 [Contact Phylum][phylum_contact] or [register][app_register] to gain access.
@@ -280,7 +340,7 @@ view the [script options output][script_options] for the latest release.
           # and committing the generated `.phylum_project` file.
           cmd: phylum-ci --lockfile requirements-prod.txt
           # Specify multiple explicit dependency file paths
-          cmd: phylum-ci --lockfile requirements-prod.txt path/to/lock.file
+          cmd: phylum-ci --lockfile requirements-prod.txt path/to/dependency.file
           # Install a specific version of the Phylum CLI.
           cmd: phylum-ci --phylum-release 4.8.0 --force-install
           # Mix and match for your specific use case.
@@ -288,7 +348,7 @@ view the [script options output][script_options] for the latest release.
             phylum-ci \
               -vv \
               --lockfile requirements-dev.txt \
-              --lockfile requirements-prod.txt path/to/lock.file \
+              --lockfile requirements-prod.txt path/to/dependency.file \
               --lockfile Cargo.toml \
               --force-analysis \
               --all-deps
@@ -329,7 +389,7 @@ installed version of the Phylum CLI and all required tools needed for [lockfile 
 An advantage of using the default Docker image is that the complete environment is packaged and made available with
 components that are known to work together.
 
-One disadvantage to the default image is it's size. It can take a while to download and may provide more tools than
+One disadvantage to the default image is its size. It can take a while to download and may provide more tools than
 required for your specific use case. Special `slim` tags of the `phylum-ci` image are provided as an alternative.
 These tags differ from the default image in that they do not contain the required tools needed for
 [lockfile generation][lockfile_generation] (with the exception of the `pip` tool). The `slim` tags are significantly
@@ -419,6 +479,44 @@ The `GITHUB_TOKEN` and `PHYLUM_API_KEY` environment variables are required to ha
 options are the same as [already documented](#getting-started).
 
 [container_step]: https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsuses
+
+## FAQs
+
+### Why does Phylum report a failing status check if it shows a successful analysis comment?
+
+It is possible to get a successful Phylum analysis comment on the PR **and also** have the Phylum action report a
+failing status check. This happens when one or more dependency files fails the filtering process while at least one
+dependency file passes the filtering process **and** the Phylum analysis.
+
+The failing status check is meant to serve as an indication to the repository owner that an issue exists with at least
+one of the dependency files submitted, whether they intended it or not. The reasoning is that it is better to be
+explicit about possible failures, allowing for review of the logs and correction, than to silently ignore the failure
+and possibly allow untrusted code into the repository.
+
+There are several reasons a dependency file may fail the filtering process and each failure will be included in the logs
+as a warning. The file may not exist or it may exist, but only as an empty file. The file may fail to be parsed by
+Phylum. The dependency files can be manifests or lockfiles and they can either be provided explicitly or automatically
+detected when not provided. Sometimes the automatic detection will misattribute a file as a manifest or assign the wrong
+lockfile type. As detailed in the ["Supported Dependency Files"](#supported-dependency-files) section, the
+recommendation for this situation is to specify the path and lockfile type explicitly in a `.phylum_project` file at
+the root of the project repository.
+
+### Why does analysis fail for PRs from forked repositories?
+
+Another reason why Phylum reports
+[failing status checks](#why-does-phylum-report-a-failing-status-check-if-it-shows-a-successful-analysis-comment) is for
+`pull_request_target` events where manifests are provided. Using `pull_request_target` events for forked repositories
+has security implications if done improperly. Attackers may be able to obtain repository write permissions or steal
+repository secrets. A more comprehensive enumeration of the risks can be found here:
+
+* GitHub Security Lab: ["Preventing pwn requests"][gh_pwn]
+* GitGuardian: ["GitHub Actions Security Best Practices"][gha_security]
+
+This GitHub action disables lockfile generation to prevent arbitrary code execution in an untrusted context, like PRs
+from forks. This means that provided manifests are unable to be parsed by Phylum since parsing first requires generating
+a lockfile from the manifest. A unique error code and warning message is provided so as to better signal the
+implication: the resolved dependencies from the manifest have NOT been analyzed by Phylum. Care should be taken to
+inspect changes manually before allowing a manifest to be used in a trusted context.
 
 ## License
 

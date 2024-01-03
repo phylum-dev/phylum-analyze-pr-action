@@ -57,8 +57,8 @@ The pre-requisites for using this image are:
 [PAT]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
 [phylum_contact]: https://phylum.io/contact-us
 [app_register]: https://app.phylum.io/register
-[phylum_tokens]: https://docs.phylum.io/docs/api-keys
-[phylum_register]: https://docs.phylum.io/docs/phylum_auth_register
+[phylum_tokens]: https://docs.phylum.io/knowledge_base/api-keys
+[phylum_register]: https://docs.phylum.io/cli/commands/phylum_auth_register
 
 ## Supported Dependency Files
 
@@ -78,10 +78,10 @@ at the root of the project repository. The easiest way to do that is with the Ph
 The Phylum Knowledge Base contains the list of currently [supported lockfiles][supported_lockfiles]. It is also where
 information on [lockfile generation][lockfile_generation] can be found for current manifest file support.
 
-[supported_lockfiles]: https://docs.phylum.io/docs/supported_lockfiles
-[lockfile_generation]: https://docs.phylum.io/docs/lockfile_generation
-[lockifests]: https://docs.phylum.io/docs/lockfile_generation#lockifests
-[phylum_init]: https://docs.phylum.io/docs/phylum_init
+[supported_lockfiles]: https://docs.phylum.io/cli/supported_lockfiles
+[lockfile_generation]: https://docs.phylum.io/cli/lockfile_generation
+[lockifests]: https://docs.phylum.io/cli/lockfile_generation#lockifests
+[phylum_init]: https://docs.phylum.io/cli/commands/phylum_init
 
 ## Getting Started
 
@@ -298,7 +298,7 @@ view the [script options output][script_options] for the latest release.
         uses: phylum-dev/phylum-analyze-pr-action@v2
         with:
           # Contact Phylum (phylum.io/contact-us) or register (app.phylum.io/register) to gain access.
-          # See also `phylum auth register` (docs.phylum.io/docs/phylum_auth_register) command docs.
+          # See also `phylum auth register` (docs.phylum.io/cli/commands/phylum_auth_register) docs.
           # Consider using a bot or group account for this token.
           phylum_token: ${{ secrets.PHYLUM_TOKEN }}
 
@@ -336,8 +336,8 @@ view the [script options output][script_options] for the latest release.
           # they can be named differently and may or may not contain strict dependencies.
           # In these cases it is best to specify an explicit path, either with the `--depfile`
           # option or in a `.phylum_project` file. The easiest way to do that is with the
-          # Phylum CLI, using the `phylum init` command (https://docs.phylum.io/docs/phylum_init)
-          # and committing the generated `.phylum_project` file.
+          # Phylum CLI, using the `phylum init` (https://docs.phylum.io/cli/commands/phylum_init)
+          # command and committing the generated `.phylum_project` file.
           cmd: phylum-ci --depfile requirements-prod.txt
           # Specify multiple explicit dependency file paths
           cmd: phylum-ci --depfile requirements-prod.txt path/to/dependency.file

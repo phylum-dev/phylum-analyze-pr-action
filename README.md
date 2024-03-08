@@ -304,8 +304,7 @@ view the [script options output][script_options] for the latest release.
           # Consider using a bot or group account for this token.
           phylum_token: ${{ secrets.PHYLUM_TOKEN }}
 
-          # NOTE: These are examples. Only one `github_token` entry line is expected,
-          #       and only with comment generation enabled.
+          # NOTE: These are examples. At most one `github_token` entry line is needed.
           #
           # Use the default `GITHUB_TOKEN` provided automatically at the start of each workflow run.
           # This entry does not have to be specified since it is the default.

@@ -16,8 +16,7 @@ branding:
 inputs:
   github_token:
     description: GITHUB_TOKEN with at least write access to pull-requests scope or a repo scoped PAT
-    # The token is not required if comment generation is skipped
-    required: false
+    required: true
     default: ${{ github.token }}
   phylum_token:
     description: Phylum token

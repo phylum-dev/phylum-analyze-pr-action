@@ -19,9 +19,9 @@ authors, and engineering risk, in addition to software vulnerabilities and licen
 [our website](https://phylum.io).
 
 Once configured for a repository, this action will provide analysis of project dependencies from lockfiles or manifests
-during a Pull Request (PR) and output the results as a comment on the PR.
+during a Pull Request (PR) and output the results as a comment on the PR unless the option to skip comments is provided.
 The CI job will return an error (i.e., fail the build) if any of the newly added/modified dependencies from the PR fail
-to meet the established policy.
+to meet the established policy unless audit mode is specified.
 
 There will be no note if no dependencies were added or modified for a given PR.
 If one or more dependencies are still processing (no results available), then the note will make that clear and the CI
@@ -37,6 +37,7 @@ The pre-requisites for using this image are:
   * Self-hosted runners must use a Linux operating system and have Docker installed
 * Access to the `phylum-dev/phylum-ci` Docker image from the [GitHub Container Registry][package]
 * A [GitHub token][gh_token] with API access
+  * Not required when comment generation has been skipped
   * Can be the default `GITHUB_TOKEN` provided automatically at the start of each workflow run
     * Needs at least write access for `pull-requests` scope - see [documentation][scopes]
   * Can be a personal access token (PAT) - see [documentation][PAT]
@@ -273,6 +274,7 @@ See also [`phylum auth register`][phylum_register] command documentation and con
 using a bot or group account for this token.
 
 A [GitHub token][gh_token] with API access is required to use the API (e.g., to post comments).
+It is not required when comment generation has been skipped (e.g., when in audit mode).
 This can be the default `GITHUB_TOKEN` provided automatically at the start of each workflow run but it will need at
 least write access for the `pull-requests` scope (see [documentation][scopes]).
 Alternatively, it can be a [personal access token (PAT)][PAT] with the `repo` scope or minimally the `public_repo`
@@ -302,7 +304,7 @@ view the [script options output][script_options] for the latest release.
           # Consider using a bot or group account for this token.
           phylum_token: ${{ secrets.PHYLUM_TOKEN }}
 
-          # NOTE: These are examples. Only one `github_token` entry line is expected.
+          # NOTE: These are examples. At most one `github_token` entry line is needed.
           #
           # Use the default `GITHUB_TOKEN` provided automatically at the start of each workflow run.
           # This entry does not have to be specified since it is the default.
@@ -317,7 +319,7 @@ view the [script options output][script_options] for the latest release.
           # the active policy set at the Phylum project level.
           # This entry does not have to be specified since it is the default.
           cmd: phylum-ci
-          # Provide debug level output
+          # Provide debug level output.
           cmd: phylum-ci -vv
           # Consider all dependencies in analysis results instead of just the newly added ones.
           # The default is to only analyze newly added dependencies, which can be useful for
@@ -325,10 +327,6 @@ view the [script options output][script_options] for the latest release.
           # but don't want to make things worse. Specifying `--all-deps` can be useful for
           # casting the widest net for strict adherence to Quality Assurance (QA) standards.
           cmd: phylum-ci --all-deps
-          # Force analysis, even when no dependency file has changed. This can be useful for
-          # manifests, where the loosely specified dependencies may not change often but the
-          # completely resolved set of strict dependencies does.
-          cmd: phylum-ci --force-analysis
           # Force analysis for all dependencies in a manifest file. This is especially useful
           # for *workspace* manifest files where there is no companion lockfile (e.g., libraries).
           cmd: phylum-ci --force-analysis --all-deps --depfile Cargo.toml
@@ -339,8 +337,10 @@ view the [script options output][script_options] for the latest release.
           # Phylum CLI, using the `phylum init` (https://docs.phylum.io/cli/commands/phylum_init)
           # command and committing the generated `.phylum_project` file.
           cmd: phylum-ci --depfile requirements-prod.txt
-          # Specify multiple explicit dependency file paths
+          # Specify multiple explicit dependency file paths.
           cmd: phylum-ci --depfile requirements-prod.txt path/to/dependency.file
+          # Analyze all dependencies in audit mode, to gain insight without failing builds.
+          cmd: phylum-ci --all-deps --audit
           # Install a specific version of the Phylum CLI.
           cmd: phylum-ci --phylum-release 4.8.0 --force-install
           # Mix and match for your specific use case.
@@ -355,6 +355,9 @@ view the [script options output][script_options] for the latest release.
 ```
 
 ## Example Comments
+
+> **NOTE:** Comments will not be shown when in audit mode or when comments are explicitly skipped.
+> Analysis output will still be available in the logs.
 
 ---
 

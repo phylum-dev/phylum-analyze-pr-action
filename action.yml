@@ -24,7 +24,7 @@ inputs:
   cmd:
     description: The phylum-ci command line to pass to the Docker container's entrypoint
     required: true
-    default: phylum-ci
+    default: phylum-ci -vv
 runs:
   using: docker
   image: docker://ghcr.io/phylum-dev/phylum-ci:latest

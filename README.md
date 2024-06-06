@@ -110,8 +110,8 @@ jobs:
 ```
 
 This configuration contains a single job, with two steps, that will only run on pull request events.
-It does not override any of the `phylum-ci` arguments, which are all either optional or default to secure values.
-Let's take a deeper dive into each part of the configuration:
+It provides debug output but otherwise does not override any of the `phylum-ci` arguments, which are all either
+optional or default to secure values. Let's take a deeper dive into each part of the configuration:
 
 ### Workflow and Job names
 
@@ -197,7 +197,7 @@ See the [GitHub documentation][scopes] for more info.
 ```
 
 When using a personal access token (PAT) instead, the token should be created with the `repo` scope or
-minimally the with `public_repo` scope if private repositories will not be used with the PAT.
+minimally with the `public_repo` scope if private repositories will not be used with the PAT.
 See the [GitHub documentation][PAT] for more info.
 
 ```yaml
@@ -314,13 +314,13 @@ view the [script options output][script_options] for the latest release.
 
           # NOTE: These are examples. Only one `cmd` entry line is expected.
           #
-          # Use the defaults for all the arguments.
-          # The default behavior is to only analyze newly added dependencies against
-          # the active policy set at the Phylum project level.
+          # Use the defaults for all the arguments and provide debug level output.
+          # The default behavior is to only analyze newly added dependencies
+          # against the active policy set at the Phylum project level.
           # This entry does not have to be specified since it is the default.
-          cmd: phylum-ci
-          # Provide debug level output.
           cmd: phylum-ci -vv
+          # Same as the previous entry, but without debug level output.
+          cmd: phylum-ci
           # Consider all dependencies in analysis results instead of just the newly added ones.
           # The default is to only analyze newly added dependencies, which can be useful for
           # existing code bases that may not meet established policy rules yet,
@@ -342,7 +342,7 @@ view the [script options output][script_options] for the latest release.
           # Analyze all dependencies in audit mode, to gain insight without failing builds.
           cmd: phylum-ci --all-deps --audit
           # Install a specific version of the Phylum CLI.
-          cmd: phylum-ci --phylum-release 4.8.0 --force-install
+          cmd: phylum-ci --phylum-release 6.5.0 --force-install
           # Mix and match for your specific use case.
           cmd: |
             phylum-ci \

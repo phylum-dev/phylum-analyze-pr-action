@@ -153,7 +153,7 @@ jobs:
     continue-on-error: true     # This is the job level
     steps:
       - name: Checkout the repo with full history
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0        # Not really needed for `--all-deps`
       - name: Analyze lockfile
@@ -161,5 +161,5 @@ jobs:
         uses: phylum-dev/phylum-analyze-pr-action@v2
         with:
           phylum_token: ${{ secrets.PHYLUM_TOKEN }}
-          cmd: phylum-ci --all-deps
+          cmd: phylum-ci -vv --all-deps
 ```

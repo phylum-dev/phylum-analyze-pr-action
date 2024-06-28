@@ -30,7 +30,7 @@ job will only fail if dependencies that have _completed analysis results_ do not
 ## Prerequisites
 
 The GitHub Actions environment is primarily supported through the use of a Docker image.
-The pre-requisites for using this image are:
+The prerequisites for using this image are:
 
 * Ability to run a [Docker container action][container]
   * GitHub-hosted runners must use an Ubuntu runner
@@ -339,6 +339,9 @@ view the [script options output][script_options] for the latest release.
           cmd: phylum-ci --depfile requirements-prod.txt
           # Specify multiple explicit dependency file paths.
           cmd: phylum-ci --depfile requirements-prod.txt path/to/dependency.file
+          # Perform analysis as part of a group-owned project.
+          # A paid account is needed to use groups: https://phylum.io/pricing
+          cmd: phylum-ci --group my_group
           # Analyze all dependencies in audit mode, to gain insight without failing builds.
           cmd: phylum-ci --all-deps --audit
           # Install a specific version of the Phylum CLI.

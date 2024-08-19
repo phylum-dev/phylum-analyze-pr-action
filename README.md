@@ -345,8 +345,8 @@ view the [script options output][script_options] for the latest release.
           cmd: phylum-ci --exclude "build.gradle" "tests/fixtures/*"
           cmd: |
             phylum-ci \
-              --exclude "build.gradle" \
-              --exclude "tests/fixtures/*"
+              --exclude "/requirements-*.txt" \
+              --exclude "build.gradle" "tests/fixtures/*"
           # Perform analysis as part of a group-owned project.
           # A paid account is needed to use groups: https://phylum.io/pricing
           cmd: phylum-ci --group my_group

@@ -339,6 +339,14 @@ view the [script options output][script_options] for the latest release.
           cmd: phylum-ci --depfile requirements-prod.txt
           # Specify multiple explicit dependency file paths.
           cmd: phylum-ci --depfile requirements-prod.txt path/to/dependency.file
+          # Exclude dependency files by glob-style pattern.
+          cmd: phylum-ci --exclude "requirements-*.txt"
+          # Specify multiple exclusion patterns.
+          cmd: phylum-ci --exclude "build.gradle" "tests/fixtures/*"
+          cmd: |
+            phylum-ci \
+              --exclude "build.gradle" \
+              --exclude "tests/fixtures/*"
           # Perform analysis as part of a group-owned project.
           # A paid account is needed to use groups: https://phylum.io/pricing
           cmd: phylum-ci --group my_group

@@ -342,7 +342,7 @@ view the [script options output][script_options] for the latest release.
           # Exclude dependency files by gitignore-style pattern.
           cmd: phylum-ci --exclude "requirements-*.txt"
           # Specify multiple exclusion patterns.
-          cmd: phylum-ci --exclude "build.gradle" "tests/fixtures/*"
+          cmd: phylum-ci --exclude "build.gradle" "tests/fixtures/"
           cmd: |
             phylum-ci \
               --exclude "/requirements-*.txt" \

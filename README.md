@@ -368,7 +368,7 @@ view the [script options output][script_options] for the latest release.
 ### Exit Codes
 
 The Phylum Analyze PR action will return a zero (0) exit code when it completes successfully and a non-zero code
-otherwise. The full and current list of exit codes, with explanations, is [documented here][exit_codes].
+otherwise. The full and current list of exit codes is [documented here][exit_codes].
 
 [exit_codes]: https://github.com/phylum-dev/phylum-ci?tab=readme-ov-file#exit-codes
 

@@ -72,17 +72,18 @@ and may or may not contain strict dependencies. That is, they can be either a lo
 "[lockifests]." Some dependency files fail to parse as the expected lockfile type (e.g., `pip` instead of `poetry` for
 `pyproject.toml` manifests).
 
-For these situations, the recommendation is to specify the path and lockfile type explicitly in a `.phylum_project` file
-at the root of the project repository. The easiest way to do that is with the Phylum CLI, using the
-[`phylum init` command][phylum_init] and committing the generated `.phylum_project` file.
+For these situations, the recommendation is to specify the path and lockfile type explicitly in a
+[`.phylum_project` file] at the root of the project repository. The easiest way to do that is with the Phylum CLI,
+using the [`phylum init` command][phylum_init] and committing the generated `.phylum_project` file.
 
 The Phylum Knowledge Base contains the list of currently [supported lockfiles][supported_lockfiles]. It is also where
 information on [lockfile generation][lockfile_generation] can be found for current manifest file support.
 
+[lockifests]: https://docs.phylum.io/cli/lockfile_generation#lockifests
+[`.phylum_project` file]: https://docs.phylum.io/knowledge_base/phylum_project_files
+[phylum_init]: https://docs.phylum.io/cli/commands/phylum_init
 [supported_lockfiles]: https://docs.phylum.io/cli/supported_lockfiles
 [lockfile_generation]: https://docs.phylum.io/cli/lockfile_generation
-[lockifests]: https://docs.phylum.io/cli/lockfile_generation#lockifests
-[phylum_init]: https://docs.phylum.io/cli/commands/phylum_init
 
 ## Getting Started
 
@@ -299,15 +300,16 @@ view the [script options output][script_options] for the latest release.
       - name: Analyze dependencies
         uses: phylum-dev/phylum-analyze-pr-action@v2
         with:
-          # Contact Phylum (phylum.io/contact-us) or register (app.phylum.io/register) to gain access.
-          # See also `phylum auth register` (docs.phylum.io/cli/commands/phylum_auth_register) docs.
+          # Contact Phylum (phylum.io/contact-us) or register (app.phylum.io/register)
+          # to gain access. See also `phylum auth register` docs:
+          # https://docs.phylum.io/cli/commands/phylum_auth_register
           # Consider using a bot or group account for this token.
           phylum_token: ${{ secrets.PHYLUM_TOKEN }}
 
-          # NOTE: These are examples. At most one `github_token` entry line is needed.
+          # NOTE: These are examples. Specify at most one `github_token` entry line.
           #
-          # Use the default `GITHUB_TOKEN` provided automatically at the start of each workflow run.
-          # This entry does not have to be specified since it is the default.
+          # Use the default `GITHUB_TOKEN` provided automatically at the start
+          # of each workflow run. This entry is optional since it is the default.
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # Use a personal access token (PAT)
           github_token: ${{ secrets.GITHUB_PAT }}
@@ -321,21 +323,25 @@ view the [script options output][script_options] for the latest release.
           cmd: phylum-ci -vv
           # Same as the previous entry, but without debug level output.
           cmd: phylum-ci
-          # Consider all dependencies in analysis results instead of just the newly added ones.
-          # The default is to only analyze newly added dependencies, which can be useful for
-          # existing code bases that may not meet established policy rules yet,
-          # but don't want to make things worse. Specifying `--all-deps` can be useful for
-          # casting the widest net for strict adherence to Quality Assurance (QA) standards.
+          # Consider all dependencies in analysis results instead of just the
+          # newly added ones. The default is to only analyze newly added
+          # dependencies, which can be useful for existing code bases that may
+          # not meet established policy rules yet, but don't want to make things
+          # worse. Specifying `--all-deps` can be useful for casting the widest
+          # net for strict adherence to Quality Assurance (QA) standards.
           cmd: phylum-ci --all-deps
-          # Force analysis for all dependencies in a manifest file. This is especially useful
-          # for *workspace* manifest files where there is no companion lockfile (e.g., libraries).
+          # Force analysis for all dependencies in a manifest file.
+          # This is especially useful for *workspace* manifest files where
+          # there is no companion lockfile (e.g., libraries).
           cmd: phylum-ci --force-analysis --all-deps --depfile Cargo.toml
-          # Some lockfile types (e.g., Python/pip `requirements.txt`) are ambiguous in that
-          # they can be named differently and may or may not contain strict dependencies.
-          # In these cases it is best to specify an explicit path, either with the `--depfile`
-          # option or in a `.phylum_project` file. The easiest way to do that is with the
-          # Phylum CLI, using the `phylum init` (https://docs.phylum.io/cli/commands/phylum_init)
-          # command and committing the generated `.phylum_project` file.
+          # Some lockfile types (e.g., Python/pip `requirements.txt`) are ambiguous
+          # in that they can be named differently and may or may not contain strict
+          # dependencies. In these cases it is best to specify an explicit path,
+          # either with the `--depfile` option or in a `.phylum_project` file:
+          # https://docs.phylum.io/knowledge_base/phylum_project_files
+          # The easiest way to do that is with the Phylum CLI, using the
+          # `phylum init` (https://docs.phylum.io/cli/commands/phylum_init) command
+          # and committing the generated `.phylum_project` file.
           cmd: phylum-ci --depfile requirements-prod.txt
           # Specify multiple explicit dependency file paths.
           cmd: phylum-ci --depfile requirements-prod.txt path/to/dependency.file
@@ -350,7 +356,8 @@ view the [script options output][script_options] for the latest release.
           # Perform analysis as part of a group-owned project.
           # A paid account is needed to use groups: https://phylum.io/pricing
           cmd: phylum-ci --group my_group
-          # Analyze all dependencies in audit mode, to gain insight without failing builds.
+          # Analyze all dependencies in audit mode,
+          # to gain insight without failing builds.
           cmd: phylum-ci --all-deps --audit
           # Install a specific version of the Phylum CLI.
           cmd: phylum-ci --phylum-release 6.5.0 --force-install
@@ -503,6 +510,12 @@ options are the same as [already documented](#getting-started).
 
 ## FAQs
 
+> 💡 **INFO** 💡
+>
+> There are more FAQs in the [Phylum Knowledge Base][phylum_kb].
+
+[phylum_kb]: https://docs.phylum.io/knowledge_base/faq
+
 ### Why does Phylum report a failing status check if it shows a successful analysis comment?
 
 It is possible to get a successful Phylum analysis comment on the PR **and also** have the Phylum action report a
@@ -519,7 +532,7 @@ as a warning. The file may not exist or it may exist, but only as an empty file.
 Phylum. The dependency files can be manifests or lockfiles and they can either be provided explicitly or automatically
 detected when not provided. Sometimes the automatic detection will misattribute a file as a manifest or assign the wrong
 lockfile type. As detailed in the ["Supported Dependency Files"](#supported-dependency-files) section, the
-recommendation for this situation is to specify the path and lockfile type explicitly in a `.phylum_project` file at
+recommendation for this situation is to specify the path and lockfile type explicitly in a [`.phylum_project` file] at
 the root of the project repository.
 
 ### Why does analysis fail for PRs from forked repositories?

@@ -301,9 +301,8 @@ view the [script options output][script_options] for the latest release.
         uses: phylum-dev/phylum-analyze-pr-action@v2
         with:
           # Contact Phylum (phylum.io/contact-us) or register (app.phylum.io/register)
-          # to gain access. See also `phylum auth register` docs:
-          # https://docs.phylum.io/cli/commands/phylum_auth_register
-          # Consider using a bot or group account for this token.
+          # to gain access. Consider using a bot or group account for this token. See:
+          # https://docs.phylum.io/knowledge_base/api-keys
           phylum_token: ${{ secrets.PHYLUM_TOKEN }}
 
           # NOTE: These are examples. Specify at most one `github_token` entry line.
@@ -353,8 +352,10 @@ view the [script options output][script_options] for the latest release.
             phylum-ci \
               --exclude "/requirements-*.txt" \
               --exclude "build.gradle" "fixtures/"
-          # Perform analysis as part of a group-owned project.
-          # A paid account is needed to use groups: https://phylum.io/pricing
+          # Perform analysis as part of an organization and/or group-owned project.
+          # When an org is specified, a group name must also be specified.
+          # A paid account is needed to use orgs or groups: https://phylum.io/pricing
+          cmd: phylum-ci --org my_org --group my_group
           cmd: phylum-ci --group my_group
           # Analyze all dependencies in audit mode,
           # to gain insight without failing builds.
@@ -365,6 +366,8 @@ view the [script options output][script_options] for the latest release.
           cmd: |
             phylum-ci \
               -vv \
+              --org my_org \
+              --group my_group \
               --depfile requirements-dev.txt \
               --depfile requirements-prod.txt path/to/dependency.file \
               --depfile Cargo.toml \

@@ -378,9 +378,10 @@ view the [script options output][script_options] for the latest release.
 ### Exit Codes
 
 The Phylum Analyze PR action will return a zero (0) exit code when it completes successfully and a non-zero code
-otherwise. The full and current list of exit codes is [documented here][exit_codes].
+otherwise. The full and current list of exit codes is [documented here][exit_codes] and [options exist][script_options]
+to be loose with setting them.
 
-[exit_codes]: https://github.com/phylum-dev/phylum-ci?tab=readme-ov-file#exit-codes
+[exit_codes]: https://github.com/phylum-dev/phylum-ci#exit-codes
 
 ## Example Comments
 
@@ -528,7 +529,8 @@ dependency file passes the filtering process **and** the Phylum analysis.
 The failing status check is meant to serve as an indication to the repository owner that an issue exists with at least
 one of the dependency files submitted, whether they intended it or not. The reasoning is that it is better to be
 explicit about possible failures, allowing for review of the logs and correction, than to silently ignore the failure
-and possibly allow untrusted code into the repository.
+and possibly allow untrusted code into the repository. An [option is provided][script_options] to explicitly ignore
+non-analysis warnings and errors that would otherwise affect the exit code.
 
 There are several reasons a dependency file may fail the filtering process and each failure will be included in the logs
 as a warning. The file may not exist or it may exist, but only as an empty file. The file may fail to be parsed by

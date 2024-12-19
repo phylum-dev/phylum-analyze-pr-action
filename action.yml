@@ -27,7 +27,8 @@ inputs:
     default: phylum-ci -vv
 runs:
   using: docker
-  image: docker://ghcr.io/phylum-dev/phylum-ci:latest
+  #image: docker://ghcr.io/phylum-dev/phylum-ci:latest
+  image: docker://maxrake/phylum-ci:noroot_slim
   entrypoint: entrypoint.sh
   env:
     GITHUB_TOKEN: ${{ inputs.github_token }}

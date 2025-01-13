@@ -23,9 +23,10 @@ during a Pull Request (PR) and output the results as a comment on the PR unless 
 The CI job will return an error (i.e., fail the build) if any of the newly added/modified dependencies from the PR fail
 to meet the established policy unless audit mode is specified.
 
-There will be no note if no dependencies were added or modified for a given PR.
-If one or more dependencies are still processing (no results available), then the note will make that clear and the CI
-job will only fail if dependencies that have _completed analysis results_ do not meet the active policy.
+There will be no comment if no dependencies were added or modified for a given PR.
+There will be no comment when the results of the analysis are successful.
+If one or more dependencies are still processing (no results available), then the comment will make that clear and the
+CI job will only fail if dependencies that have _completed analysis results_ do not meet the active policy.
 
 ## Prerequisites
 
@@ -408,12 +409,6 @@ Phylum OSS Supply Chain Risk Analysis - INCOMPLETE
 
 ---
 
-Phylum OSS Supply Chain Risk Analysis - SUCCESS
-
-![image](https://user-images.githubusercontent.com/18729796/232164498-3ce7d24a-a4ec-4df3-92b2-ab38555703b9.png)
-
----
-
 ## Alternatives
 
 The default `phylum-ci` Docker image contains `git` and the installed `phylum` Python package. It also contains an
@@ -520,10 +515,10 @@ options are the same as [already documented](#getting-started).
 
 [phylum_kb]: https://docs.phylum.io/knowledge_base/faq
 
-### Why does Phylum report a failing status check if it shows a successful analysis comment?
+### Why does Phylum report a failing status check if it shows successful analysis?
 
-It is possible to get a successful Phylum analysis comment on the PR **and also** have the Phylum action report a
-failing status check. This happens when one or more dependency files fails the filtering process while at least one
+It is possible to get a successful Phylum analysis on the PR **and also** have the Phylum action report a failing
+status check. This happens when one or more dependency files fails the filtering process while at least one
 dependency file passes the filtering process **and** the Phylum analysis.
 
 The failing status check is meant to serve as an indication to the repository owner that an issue exists with at least
@@ -543,7 +538,7 @@ the root of the project repository.
 ### Why does analysis fail for PRs from forked repositories?
 
 Another reason why Phylum reports
-[failing status checks](#why-does-phylum-report-a-failing-status-check-if-it-shows-a-successful-analysis-comment) is for
+[failing status checks](#why-does-phylum-report-a-failing-status-check-if-it-shows-successful-analysis) is for
 `pull_request_target` events where manifests are provided. Using `pull_request_target` events for forked repositories
 has security implications if done improperly. Attackers may be able to obtain repository write permissions or steal
 repository secrets. A more comprehensive enumeration of the risks can be found here:

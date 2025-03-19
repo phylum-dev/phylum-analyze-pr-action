@@ -355,7 +355,6 @@ view the [script options output][script_options] for the latest release.
               --exclude "build.gradle" "fixtures/"
           # Perform analysis as part of an organization and/or group-owned project.
           # When an org is specified, a group name must also be specified.
-          # A paid account is needed to use orgs or groups: https://phylum.io/pricing
           cmd: phylum-ci --org my_org --group my_group
           cmd: phylum-ci --group my_group
           # Analyze all dependencies in audit mode,
@@ -563,7 +562,8 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program.
-If not, see <https://www.gnu.org/licenses/gpl.html> or write to `phylum@phylum.io` or `engineering@phylum.io`
+If not, see <https://www.gnu.org/licenses/gpl.html> or write to `phylum@veracode.com` or
+`dl-phylum-engineering@veracode.com`.
 
 ## Contributing
 

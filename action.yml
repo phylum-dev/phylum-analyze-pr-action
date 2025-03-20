@@ -8,7 +8,7 @@
 #              |___/                                         |___/
 ---
 name: Phylum Analyze PR
-author: Phylum, Inc. <engineering@phylum.io>
+author: Veracode, Inc. <dl-phylum-engineering@veracode.com>
 description: Scan dependencies with Phylum to block software supply chain attacks
 branding:
   icon:  check-circle
